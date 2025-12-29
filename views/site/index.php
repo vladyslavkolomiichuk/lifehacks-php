@@ -41,7 +41,15 @@ $this->title = 'LifeHacks - Useful Tips';
 
                         <div class="social-share" style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px; font-size: 12px; color: #777;">
                             <span class="pull-left">By <?= $article->user->name; ?> On <?= $article->date; ?></span>
-                            <span class="pull-right"><i class="glyphicon glyphicon-eye-open"></i> <?= (int)$article->viewed; ?> Views</span>
+
+                            <span class="pull-right">
+                                <a href="#" class="btn-share"
+                                    data-title="<?= \yii\helpers\Html::encode($article->title) ?>"
+                                    data-url="<?= \yii\helpers\Url::to(['site/view', 'id' => $article->id], true) ?>"
+                                    style="color: #ccc; margin-left: 10px; text-decoration: none;">
+                                    <i class="glyphicon glyphicon-share"></i> Share
+                                </a>
+                            </span>
                         </div>
 
                         <div class="btn-group">

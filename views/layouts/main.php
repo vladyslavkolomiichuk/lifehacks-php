@@ -160,6 +160,89 @@ AppAsset::register($this);
         </div>
     </footer> -->
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareButtons = document.querySelectorAll('.btn-share');
+
+            shareButtons.forEach(button => {
+                button.addEventListener('click', async (e) => {
+                    e.preventDefault();
+
+                    const title = button.getAttribute('data-title');
+                    const url = button.getAttribute('data-url');
+                    const text = 'Check out this helpful tip on LifeHacks!';
+
+                    // Функція для візуального ефекту "Copied!"
+                    const showSuccess = () => {
+                        const originalContent = button.innerHTML;
+                        const originalColor = button.style.color;
+
+                        button.innerHTML = '<i class="glyphicon glyphicon-ok"></i> Copied!';
+                        button.style.color = '#03dac6'; // Зелений
+
+                        setTimeout(() => {
+                            button.innerHTML = originalContent;
+                            button.style.color = originalColor; // Повертаємо старий колір
+                        }, 2000);
+                    };
+
+                    // 1. Спроба використати нативний шеринг (Мобільні)
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title,
+                                text,
+                                url
+                            });
+                        } catch (err) {
+                            console.log('Error sharing:', err);
+                        }
+                    }
+                    // 2. Спроба копіювання (Сучасний метод + Fallback для HTTP)
+                    else {
+                        // Якщо ми на HTTPS або localhost - пробуємо новий API
+                        if (navigator.clipboard && window.isSecureContext) {
+                            try {
+                                await navigator.clipboard.writeText(url);
+                                showSuccess();
+                            } catch (err) {
+                                fallbackCopyTextToClipboard(url);
+                            }
+                        } else {
+                            // Якщо ми на lifehacks.local (HTTP) - відразу використовуємо Fallback
+                            fallbackCopyTextToClipboard(url);
+                        }
+                    }
+
+                    // Допоміжна функція для копіювання на HTTP
+                    function fallbackCopyTextToClipboard(text) {
+                        var textArea = document.createElement("textarea");
+                        textArea.value = text;
+
+                        // Ховаємо елемент, щоб не псував вигляд
+                        textArea.style.position = "fixed";
+                        textArea.style.left = "-9999px";
+                        textArea.style.top = "0";
+
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+
+                        try {
+                            var successful = document.execCommand('copy');
+                            if (successful) showSuccess();
+                            else alert('Unable to copy link manually.');
+                        } catch (err) {
+                            alert('Could not copy link: ' + text);
+                        }
+
+                        document.body.removeChild(textArea);
+                    }
+                });
+            });
+        });
+    </script>
+
     <?php $this->endBody() ?>
 </body>
 
