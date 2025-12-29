@@ -43,6 +43,17 @@ $this->title = 'LifeHacks - Useful Tips';
                             <span class="pull-left">By <?= $article->user->name; ?> On <?= $article->date; ?></span>
                             <span class="pull-right"><i class="glyphicon glyphicon-eye-open"></i> <?= (int)$article->viewed; ?> Views</span>
                         </div>
+
+                        <div class="btn-group">
+                            <?php
+                            $isLiked = $article->isLikedByCurrentUser();
+                            $likeColor = $isLiked ? '#cf6679' : '#777'; // Червоний якщо лайкнув, сірий якщо ні
+                            $iconClass = $isLiked ? 'glyphicon-heart' : 'glyphicon-heart-empty';
+                            ?>
+                            <a href="<?= Url::to(['site/like', 'id' => $article->id]) ?>" class="btn btn-default" style="border: 1px solid #444; background: #2d2d2d; color: <?= $likeColor ?>;">
+                                <i class="glyphicon <?= $iconClass ?>"></i> <?= $article->upvotes ?> Likes
+                            </a>
+                        </div>
                     </div>
                 </article>
             <?php endforeach; ?>

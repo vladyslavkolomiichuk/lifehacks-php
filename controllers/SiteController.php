@@ -18,6 +18,7 @@ use app\models\Article;
 use app\models\Topic;
 use app\models\CommentForm;
 use app\models\User;
+use app\models\Vote;
 
 class SiteController extends Controller
 {
@@ -87,7 +88,7 @@ class SiteController extends Controller
             ->all();
 
         // Отримуємо дані для сайдбару (популярне та категорії)
-        $popular = Article::find()->orderBy(['viewed' => SORT_DESC])->limit(3)->all();
+        $popular = Article::find()->orderBy(['upvotes' => SORT_DESC])->limit(3)->all();
         $recent = Article::find()->orderBy(['date' => SORT_DESC])->limit(3)->all();
         $topics = Topic::find()->all();
 
@@ -123,7 +124,7 @@ class SiteController extends Controller
         $commentForm = new CommentForm();
 
         // Дані для сайдбару
-        $popular = Article::find()->orderBy(['viewed' => SORT_DESC])->limit(3)->all();
+        $popular = Article::find()->orderBy(['upvotes' => SORT_DESC])->limit(3)->all();
         $recent = Article::find()->orderBy(['date' => SORT_DESC])->limit(3)->all();
         $topics = Topic::find()->all();
 
@@ -157,7 +158,7 @@ class SiteController extends Controller
             ->limit($pagination->limit)
             ->all();
 
-        $popular = Article::find()->orderBy(['viewed' => SORT_DESC])->limit(3)->all();
+        $popular = Article::find()->orderBy(['upvotes' => SORT_DESC])->limit(3)->all();
         $recent = Article::find()->orderBy(['date' => SORT_DESC])->limit(3)->all();
         $topics = Topic::find()->all();
 
@@ -192,7 +193,7 @@ class SiteController extends Controller
             ->limit($pagination->limit)
             ->all();
 
-        $popular = Article::find()->orderBy(['viewed' => SORT_DESC])->limit(3)->all();
+        $popular = Article::find()->orderBy(['upvotes' => SORT_DESC])->limit(3)->all();
         $recent = Article::find()->orderBy(['date' => SORT_DESC])->limit(3)->all();
         $topics = Topic::find()->all();
 
@@ -271,5 +272,42 @@ class SiteController extends Controller
         return $this->render('signup', [
             'model' => $model,
         ]);
+    }
+
+    /**
+     * Like / Unlike action
+     */
+    public function actionLike($id)
+    {
+        // Тільки для авторизованих
+        if (Yii::$app->user->isGuest) {
+            return $this->redirect(['/site/login']);
+        }
+
+        $article = Article::findOne($id);
+        if (!$article) {
+            return $this->redirect(['index']);
+        }
+
+        $currentUser = Yii::$app->user->id;
+
+        // Перевіряємо, чи вже є лайк
+        $vote = Vote::find()->where(['user_id' => $currentUser, 'article_id' => $id])->one();
+
+        if ($vote) {
+            // Якщо є - видаляємо (дизлайк) і зменшуємо лічильник
+            $vote->delete();
+            $article->updateCounters(['upvotes' => -1]);
+        } else {
+            // Якщо немає - створюємо (лайк) і збільшуємо лічильник
+            $vote = new Vote();
+            $vote->user_id = $currentUser;
+            $vote->article_id = $id;
+            $vote->save();
+            $article->updateCounters(['upvotes' => 1]);
+        }
+
+        // Повертаємо користувача на сторінку, з якої він прийшов
+        return $this->redirect(Yii::$app->request->referrer);
     }
 }

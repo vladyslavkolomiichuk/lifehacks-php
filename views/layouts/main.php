@@ -151,14 +151,14 @@ AppAsset::register($this);
         </div>
     </main>
 
-    <footer id="footer" class="footer mt-auto py-3 text-muted">
+    <!-- <footer id="footer" class="footer mt-auto py-3 text-muted">
         <div class="container">
             <div class="row text-muted">
                 <div class="col-md-6 text-center text-md-start">&copy; LifeHacks App <?= date('Y') ?></div>
                 <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
             </div>
         </div>
-    </footer>
+    </footer> -->
 
     <?php $this->endBody() ?>
 </body>

@@ -101,4 +101,23 @@ class Article extends \yii\db\ActiveRecord
     {
         return ($this->image) ? '/uploads/' . $this->image : 'https://via.placeholder.com/800x400?text=No+Image';
     }
+
+    public function getVotes()
+    {
+        return $this->hasMany(Vote::class, ['article_id' => 'id']);
+    }
+
+    /**
+     * Перевіряє, чи лайкнув статтю поточний користувач
+     */
+    public function isLikedByCurrentUser()
+    {
+        if (Yii::$app->user->isGuest) {
+            return false;
+        }
+        // Шукаємо запис у таблиці vote
+        return Vote::find()
+            ->where(['user_id' => Yii::$app->user->id, 'article_id' => $this->id])
+            ->exists();
+    }
 }
