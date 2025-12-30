@@ -11,19 +11,17 @@ use Yii;
  * @property string|null $text
  * @property int|null $user_id
  * @property int|null $article_id
- * @property int|null $comment_id
+ * @property int|null $parent_id   <-- ВИПРАВЛЕНО: Було comment_id
  * @property string|null $date
  * @property int|null $delete
  *
  * @property Article $article
- * @property Comment $comment
- * @property Comment[] $comments
  * @property User $user
+ * @property Comment $parent       <-- Батьківський коментар
+ * @property Comment[] $children   <-- Дочірні коментарі (відповіді)
  */
 class Comment extends \yii\db\ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -38,13 +36,23 @@ class Comment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['text', 'user_id', 'article_id', 'comment_id', 'date', 'delete'], 'default', 'value' => null],
-            [['user_id', 'article_id', 'comment_id', 'delete'], 'integer'],
+            // Задаємо значення за замовчуванням null
+            [['text', 'user_id', 'article_id', 'parent_id', 'date', 'delete'], 'default', 'value' => null],
+
+            // Вказуємо, що це цілі числа
+            [['user_id', 'article_id', 'parent_id', 'delete'], 'integer'],
+
             [['date'], 'safe'],
             [['text'], 'string', 'max' => 255],
+
+            // Перевірка існування зв'язаних записів
             [['article_id'], 'exist', 'skipOnError' => true, 'targetClass' => Article::class, 'targetAttribute' => ['article_id' => 'id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
-            [['comment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comment::class, 'targetAttribute' => ['comment_id' => 'id']],
+
+            // Валідація parent_id (перевіряємо, чи існує такий батьківський коментар)
+            [['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => Comment::class, 'targetAttribute' => ['parent_id' => 'id']],
+
+            [['is_edited'], 'integer'],
         ];
     }
 
@@ -58,16 +66,14 @@ class Comment extends \yii\db\ActiveRecord
             'text' => 'Text',
             'user_id' => 'User ID',
             'article_id' => 'Article ID',
-            'comment_id' => 'Comment ID',
+            'parent_id' => 'Parent Comment', // Виправлено назву
             'date' => 'Date',
             'delete' => 'Delete',
         ];
     }
 
     /**
-     * Gets query for [[Article]].
-     *
-     * @return \yii\db\ActiveQuery
+     * Зв'язок зі статтею
      */
     public function getArticle()
     {
@@ -75,33 +81,27 @@ class Comment extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Comment]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getComment()
-    {
-        return $this->hasOne(Comment::class, ['id' => 'comment_id']);
-    }
-
-    /**
-     * Gets query for [[Comments]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public function getComments()
-    {
-        return $this->hasMany(Comment::class, ['comment_id' => 'id']);
-    }
-
-    /**
-     * Gets query for [[User]].
-     *
-     * @return \yii\db\ActiveQuery
+     * Зв'язок з автором коментаря
      */
     public function getUser()
     {
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
+    /**
+     * ОТРИМАТИ ВІДПОВІДІ (Дітей)
+     * Саме цей метод ми використовуємо у views/site/single.php ($comment->children)
+     */
+    public function getChildren()
+    {
+        return $this->hasMany(Comment::class, ['parent_id' => 'id']);
+    }
+
+    /**
+     * Отримати батьківський коментар (опціонально, може знадобитися в майбутньому)
+     */
+    public function getParent()
+    {
+        return $this->hasOne(Comment::class, ['id' => 'parent_id']);
+    }
 }

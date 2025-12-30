@@ -9,6 +9,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use yii\data\Pagination;
 use yii\web\NotFoundHttpException;
+use yii\web\Cookie;
 
 // Підключаємо наші моделі
 use app\models\LoginForm;
@@ -19,6 +20,7 @@ use app\models\Topic;
 use app\models\CommentForm;
 use app\models\User;
 use app\models\Vote;
+use app\models\Comment;
 
 class SiteController extends Controller
 {
@@ -102,38 +104,53 @@ class SiteController extends Controller
     }
 
     /**
-     * Сторінка перегляду однієї поради
+     * Перегляд однієї статті.
+     * Реалізовано захист від накрутки переглядів (1 перегляд на 24 години для користувача).
      */
     public function actionView($id)
     {
+        // 1. Знаходимо статтю в базі даних
         $article = Article::findOne($id);
 
-        // Якщо статтю не знайдено - помилка 404
         if (!$article) {
-            throw new NotFoundHttpException("The requested article does not exist.");
+            throw new \yii\web\NotFoundHttpException("Article not found.");
         }
 
-        // Збільшуємо лічильник переглядів
-        $article->viewed += 1;
-        $article->save(false);
+        // 2. ЛОГІКА УНІКАЛЬНОГО ПЕРЕГЛЯДУ (через Cookies)
+        // Перевіряємо, чи є у користувача кука, що він вже бачив цю статтю
+        $cookiesRequest = Yii::$app->request->cookies;
+        $cookieName = 'viewed_article_' . $id;
 
-        // Отримуємо коментарі (активні)
-        $comments = $article->getComments()->where(['delete' => 0])->all();
+        if (!$cookiesRequest->has($cookieName)) {
+            // Якщо куки немає:
+            // А) Збільшуємо лічильник у БД
+            $article->updateCounters(['viewed' => 1]);
 
-        // Форма для нового коментаря
+            // Б) Записуємо куку користувачу на 24 години (86400 секунд)
+            $cookiesResponse = Yii::$app->response->cookies;
+            $cookiesResponse->add(new \yii\web\Cookie([
+                'name' => $cookieName,
+                'value' => '1',
+                'expire' => time() + 86400, // Час життя: поточний час + 1 доба
+            ]));
+        }
+
+        // 3. Отримуємо коментарі (активні)
+        $comments = $article->getComments()->all();
+
+        // 4. Модель для форми нового коментаря
         $commentForm = new CommentForm();
 
-        // Дані для сайдбару
+        // 5. Дані для сайдбару (Популярні пости сортуємо за лайками)
         $popular = Article::find()->orderBy(['upvotes' => SORT_DESC])->limit(3)->all();
-        $recent = Article::find()->orderBy(['date' => SORT_DESC])->limit(3)->all();
         $topics = Topic::find()->all();
 
+        // 6. Відображаємо вигляд
         return $this->render('single', [
             'article' => $article,
             'comments' => $comments,
             'commentForm' => $commentForm,
             'popular' => $popular,
-            'recent' => $recent,
             'topics' => $topics,
         ]);
     }
@@ -216,13 +233,86 @@ class SiteController extends Controller
 
         if (Yii::$app->request->isPost) {
             $model->load(Yii::$app->request->post());
-            if ($model->saveComment($id)) {
-                Yii::$app->session->setFlash('success', "Comment posted successfully!");
+            if ($model->validate()) {
+
+                $comment = new Comment();
+                $comment->article_id = $id;
+                $comment->user_id = Yii::$app->user->id;
+                $comment->text = $model->comment;
+                $comment->date = date('Y-m-d');
+
+                // Якщо є parentId, зберігаємо його
+                if (!empty($model->parentId)) {
+                    $comment->parent_id = $model->parentId;
+                }
+
+                $comment->save();
+
+                Yii::$app->session->setFlash('success', "Comment added successfully");
                 return $this->redirect(['site/view', 'id' => $id]);
             }
         }
+    }
 
-        return $this->redirect(['site/view', 'id' => $id]);
+    /**
+     * Повне видалення коментаря з бази
+     */
+    public function actionDeleteComment($id)
+    {
+        $comment = Comment::findOne($id);
+
+        // Перевірка прав: чи це автор коментаря?
+        if (!$comment || Yii::$app->user->isGuest || $comment->user_id != Yii::$app->user->id) {
+            throw new \yii\web\ForbiddenHttpException("You cannot delete this comment.");
+        }
+
+        // --- БУЛО (Soft Delete) ---
+        // $comment->delete = 1;
+        // $comment->save(false);
+
+        // --- СТАЛО (Hard Delete) ---
+        // Цей метод фізично видаляє запис з SQL.
+        // Завдяки CASCADE у базі, всі відповіді (діти) теж зникнуть автоматично.
+        $comment->delete();
+
+        Yii::$app->session->setFlash('success', "Comment deleted.");
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
+     * Редагування коментаря
+     */
+    public function actionUpdateComment($id)
+    {
+        $comment = Comment::findOne($id);
+
+        // Перевірка прав
+        if (!$comment || Yii::$app->user->isGuest || $comment->user_id != Yii::$app->user->id) {
+            throw new \yii\web\ForbiddenHttpException("You cannot edit this comment.");
+        }
+
+        // Використовуємо CommentForm для валідації тексту
+        $model = new CommentForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+            // Оновлюємо текст
+            $comment->text = $model->comment;
+            // Ставимо позначку "Змінено"
+            $comment->is_edited = 1;
+
+            if ($comment->save()) {
+                Yii::$app->session->setFlash('success', "Comment updated.");
+                return $this->redirect(['site/view', 'id' => $comment->article_id]);
+            }
+        }
+
+        // Заповнюємо форму поточним текстом
+        $model->comment = $comment->text;
+
+        return $this->render('edit-comment', [
+            'model' => $model,
+            'comment' => $comment
+        ]);
     }
 
     /**

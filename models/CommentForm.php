@@ -8,12 +8,14 @@ use yii\base\Model;
 class CommentForm extends Model
 {
   public $comment;
+  public $parentId;
 
   public function rules()
   {
     return [
       [['comment'], 'required'],
-      [['comment'], 'string', 'length' => [3, 250]]
+      [['comment'], 'string', 'length' => [3, 250]],
+      [['parentId'], 'integer'],
     ];
   }
 
