@@ -31,7 +31,7 @@ $avgViews = $totalArticles > 0 ? round($totalViews / $totalArticles) : 0;
           style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #03dac6; border-radius: 50%; margin-bottom: 20px;">
 
         <h3 style="color: #fff;"><?= Html::encode($user->name) ?></h3>
-        <p style="color: #777;"><?= Html::encode($user->login) ?></p>
+        <p style="color: #777;"><?= Html::encode($user->email) ?></p>
 
         <div style="margin-top: 20px;">
           <?= Html::a('Edit Profile', ['update'], ['class' => 'btn btn-primary', 'style' => 'background-color: #bb86fc; border: none; color: #000; width: 100%; font-weight: bold;']) ?>
@@ -95,7 +95,7 @@ $avgViews = $totalArticles > 0 ? round($totalViews / $totalArticles) : 0;
 
                 <div class="col-md-7 col-xs-9">
                   <h4 class="list-group-item-heading" style="margin-top: 5px; margin-bottom: 5px;">
-                    <a href="<?= Url::to(['/site/view', 'id' => $article->id]) ?>" style="color: #fff; text-decoration: none;">
+                    <a href="<?= Url::to(['article/view', 'id' => $article->id]) ?>" style="color: #fff; text-decoration: none;">
                       <?= Html::encode($article->title) ?>
                     </a>
                   </h4>
@@ -108,13 +108,13 @@ $avgViews = $totalArticles > 0 ? round($totalViews / $totalArticles) : 0;
 
                 <div class="col-md-3 col-xs-12 text-end" style="text-align: right;">
                   <div class="btn-group btn-group-sm">
-                    <?= Html::a('<i class="glyphicon glyphicon-pencil"></i>', ['update-article', 'id' => $article->id], [
+                    <?= Html::a('<i class="glyphicon glyphicon-pencil"></i>', ['update', 'id' => $article->id], [
                       'class' => 'btn btn-primary',
                       'title' => 'Edit',
                       'style' => 'background-color: #bb86fc; border:none; color: #000;'
                     ]) ?>
 
-                    <?= Html::a('<i class="glyphicon glyphicon-trash"></i>', ['delete-article', 'id' => $article->id], [
+                    <?= Html::a('<i class="glyphicon glyphicon-trash"></i>', ['delete', 'id' => $article->id], [
                       'class' => 'btn btn-danger',
                       'title' => 'Delete',
                       'style' => 'background-color: #cf6679; border:none; color: #000;',

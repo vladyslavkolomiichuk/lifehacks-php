@@ -4,11 +4,11 @@
 /* @var $content string */
 
 use app\assets\AppAsset;
-use app\widgets\Alert;
-use yii\bootstrap5\Nav;       // Змінено з bootstrap на bootstrap5
-use yii\bootstrap5\NavBar;    // Змінено з bootstrap на bootstrap5
-use yii\bootstrap5\Html;      // Використовуємо Html з bootstrap5 для кращої сумісності
-use yii\bootstrap5\Breadcrumbs; // Змінено на bootstrap5
+// use app\widgets\Alert; // Вимкнули старий віджет
+use yii\bootstrap5\Nav;
+use yii\bootstrap5\NavBar;
+use yii\bootstrap5\Html;
+use yii\bootstrap5\Breadcrumbs;
 use yii\helpers\Url;
 
 AppAsset::register($this);
@@ -40,11 +40,9 @@ AppAsset::register($this);
 
         .content-container {
             flex: 1;
-            /* Притискає футер до низу */
             padding-top: 70px;
         }
 
-        /* Адаптація стилів під Bootstrap 5 (navbar-dark замість navbar-inverse) */
         .navbar-dark {
             background-color: #1f1f1f !important;
             border-bottom: 1px solid #333;
@@ -62,7 +60,6 @@ AppAsset::register($this);
             color: #fff !important;
         }
 
-        /* Стилі для кнопок виходу */
         .logout-btn {
             background: none;
             border: none;
@@ -79,16 +76,19 @@ AppAsset::register($this);
             background-color: #000;
             border-top: 1px solid #333;
             margin-top: auto;
-            /* BS5 спосіб притиснути футер */
         }
 
-        /* Виправлення хлібних крихт для темної теми */
         .breadcrumb {
             background-color: transparent;
         }
 
         .breadcrumb-item.active {
             color: #999;
+        }
+
+        /* Стиль для Toasts (щоб текст був читабельний) */
+        div:where(.swal2-container) h2:where(.swal2-title) {
+            color: #fff !important;
         }
     </style>
 </head>
@@ -106,24 +106,21 @@ AppAsset::register($this);
             ],
         ]);
 
-        // Формуємо пункти меню
         $menuItems = [
-            ['label' => 'Home', 'url' => ['/site/index']],
+            ['label' => 'Home', 'url' => ['article/index']],
         ];
 
         if (Yii::$app->user->isGuest) {
-            // Якщо гість: показуємо і Реєстрацію, і Вхід
-            $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
-            $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+            $menuItems[] = ['label' => 'Signup', 'url' => ['auth/signup']];
+            $menuItems[] = ['label' => 'Login', 'url' => ['auth/login']];
         } else {
-            $menuItems[] = ['label' => 'My Profile (' . Yii::$app->user->identity->name . ')', 'url' => ['/profile/index']];
+            $menuItems[] = ['label' => 'My Profile (' . Yii::$app->user->identity->name . ')', 'url' => ['profile/index']];
 
-            // Кнопка Вихід
             $menuItems[] = '<li class="nav-item">'
-                . Html::beginForm(['/site/logout'])
+                . Html::beginForm(['auth/logout'])
                 . Html::submitButton(
                     'Logout',
-                    ['class' => 'nav-link logout-btn', 'style' => 'color: #ff6b6b;'] // Червоний колір для виходу
+                    ['class' => 'nav-link logout-btn', 'style' => 'color: #ff6b6b;']
                 )
                 . Html::endForm()
                 . '</li>';
@@ -143,22 +140,13 @@ AppAsset::register($this);
             <?php if (!empty($this->params['breadcrumbs'])): ?>
                 <?= Breadcrumbs::widget([
                     'links' => $this->params['breadcrumbs'],
-                    'options' => ['class' => 'breadcrumb my-3'], // my-3 додає відступи
+                    'options' => ['class' => 'breadcrumb my-3'],
                 ]) ?>
             <?php endif ?>
-            <?= Alert::widget() ?>
+
             <?= $content ?>
         </div>
     </main>
-
-    <!-- <footer id="footer" class="footer mt-auto py-3 text-muted">
-        <div class="container">
-            <div class="row text-muted">
-                <div class="col-md-6 text-center text-md-start">&copy; LifeHacks App <?= date('Y') ?></div>
-                <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
-            </div>
-        </div>
-    </footer> -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -172,21 +160,19 @@ AppAsset::register($this);
                     const url = button.getAttribute('data-url');
                     const text = 'Check out this helpful tip on LifeHacks!';
 
-                    // Функція для візуального ефекту "Copied!"
                     const showSuccess = () => {
                         const originalContent = button.innerHTML;
                         const originalColor = button.style.color;
 
                         button.innerHTML = '<i class="glyphicon glyphicon-ok"></i> Copied!';
-                        button.style.color = '#03dac6'; // Зелений
+                        button.style.color = '#03dac6';
 
                         setTimeout(() => {
                             button.innerHTML = originalContent;
-                            button.style.color = originalColor; // Повертаємо старий колір
+                            button.style.color = originalColor;
                         }, 2000);
                     };
 
-                    // 1. Спроба використати нативний шеринг (Мобільні)
                     if (navigator.share) {
                         try {
                             await navigator.share({
@@ -197,10 +183,7 @@ AppAsset::register($this);
                         } catch (err) {
                             console.log('Error sharing:', err);
                         }
-                    }
-                    // 2. Спроба копіювання (Сучасний метод + Fallback для HTTP)
-                    else {
-                        // Якщо ми на HTTPS або localhost - пробуємо новий API
+                    } else {
                         if (navigator.clipboard && window.isSecureContext) {
                             try {
                                 await navigator.clipboard.writeText(url);
@@ -209,25 +192,19 @@ AppAsset::register($this);
                                 fallbackCopyTextToClipboard(url);
                             }
                         } else {
-                            // Якщо ми на lifehacks.local (HTTP) - відразу використовуємо Fallback
                             fallbackCopyTextToClipboard(url);
                         }
                     }
 
-                    // Допоміжна функція для копіювання на HTTP
                     function fallbackCopyTextToClipboard(text) {
                         var textArea = document.createElement("textarea");
                         textArea.value = text;
-
-                        // Ховаємо елемент, щоб не псував вигляд
                         textArea.style.position = "fixed";
                         textArea.style.left = "-9999px";
                         textArea.style.top = "0";
-
                         document.body.appendChild(textArea);
                         textArea.focus();
                         textArea.select();
-
                         try {
                             var successful = document.execCommand('copy');
                             if (successful) showSuccess();
@@ -235,13 +212,52 @@ AppAsset::register($this);
                         } catch (err) {
                             alert('Could not copy link: ' + text);
                         }
-
                         document.body.removeChild(textArea);
                     }
                 });
             });
         });
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php
+    // Отримуємо всі повідомлення з сесії
+    $flashes = Yii::$app->session->getAllFlashes();
+    if (!empty($flashes)) {
+        // Базові налаштування
+        $toastConfig = [
+            'toast' => true,
+            'position' => 'bottom-end',
+            'showConfirmButton' => false,
+            'timer' => 3000,
+            'timerProgressBar' => true,
+            'background' => '#333', // Темний фон
+            'color' => '#fff',      // Білий текст
+            'didOpen' => 'js:function(toast) {
+                toast.addEventListener("mouseenter", Swal.stopTimer)
+                toast.addEventListener("mouseleave", Swal.resumeTimer)
+            }'
+        ];
+
+        foreach ($flashes as $type => $message) {
+            // Конвертація типів Yii в типи SweetAlert
+            $icon = 'info';
+            if ($type === 'success') $icon = 'success';
+            if ($type === 'danger' || $type === 'error') $icon = 'error';
+            if ($type === 'warning') $icon = 'warning';
+
+            // Формуємо налаштування для конкретного повідомлення
+            $jsConfig = \yii\helpers\Json::encode(array_merge($toastConfig, [
+                'icon' => $icon,
+                'title' => $message
+            ]));
+
+            // Реєструємо JS код, який запуститься після завантаження сторінки
+            $this->registerJs("Swal.fire($jsConfig);");
+        }
+    }
+    ?>
 
     <?php $this->endBody() ?>
 </body>

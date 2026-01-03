@@ -10,16 +10,21 @@ use yii\base\Model;
  */
 class LoginForm extends Model
 {
-  public $username;
+  // 1. ВИПРАВЛЕНО: Змінили $username на $email
+  public $email;
   public $password;
   public $rememberMe = true;
 
+  // 2. ВИПРАВЛЕНО: Ініціалізуємо як false (прапор, що ще не завантажено),
+  // але phpdoc допомагає IDE зрозуміти типи.
   private $_user = false;
 
   public function rules()
   {
     return [
-      [['username', 'password'], 'required'],
+      // 3. ВИПРАВЛЕНО: Валідуємо email замість username
+      [['email', 'password'], 'required'],
+      ['email', 'email'], // Додали перевірку на формат email
       ['rememberMe', 'boolean'],
       ['password', 'validatePassword'],
     ];
@@ -27,16 +32,16 @@ class LoginForm extends Model
 
   /**
    * Validates the password.
-   * This method serves as the inline validation for password.
    */
   public function validatePassword($attribute, $params)
   {
     if (!$this->hasErrors()) {
       $user = $this->getUser();
 
-      // Тут має бути виклик методу з моделі User
+      // Перевірка: Якщо користувача немає АБО пароль невірний
       if (!$user || !$user->validatePassword($this->password)) {
-        $this->addError($attribute, 'Incorrect username or password.');
+        // 4. ВИПРАВЛЕНО: Текст помилки
+        $this->addError($attribute, 'Incorrect email or password.');
       }
     }
   }
@@ -49,9 +54,8 @@ class LoginForm extends Model
     if ($this->validate()) {
       $user = $this->getUser();
 
-      // ВАЖЛИВЕ ВИПРАВЛЕННЯ:
-      // Використовуємо instanceof, щоб гарантувати, що передаємо об'єкт, а не true/false
-      if ($user instanceof User) {
+      // Переконуємося, що це саме об'єкт User, а не щось інше
+      if ($user) {
         return Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
       }
     }
@@ -60,16 +64,15 @@ class LoginForm extends Model
 
   /**
    * Отримання користувача
+   * @return User|null
    */
   public function getUser()
   {
     if ($this->_user === false) {
-      // Шукаємо користувача в БД
-      $this->_user = User::findOne(['email' => $this->username]);
+      // 5. ВИПРАВЛЕНО: Використовуємо $this->email, який ми оголосили зверху
+      $this->_user = User::findOne(['email' => $this->email]);
     }
 
-    // Якщо користувача не знайдено, findOne поверне null.
-    // Це безпечно для перевірки, але повернення має бути User|null|false
     return $this->_user;
   }
 }

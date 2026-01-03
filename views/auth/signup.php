@@ -43,7 +43,7 @@ $this->title = 'Signup';
         </div>
         <div class="card-footer text-center" style="border-top: 1px solid #333;">
           <span style="color: #777;">Already have an account?</span>
-          <?= Html::a('Login', ['site/login'], ['style' => 'color: #03dac6;']) ?>
+          <?= Html::a('Login', ['auth/login'], ['style' => 'color: #03dac6;']) ?>
         </div>
       </div>
     </div>

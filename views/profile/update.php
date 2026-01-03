@@ -26,9 +26,9 @@ $this->title = 'Edit Profile';
 
           <?= $form->field($user, 'name')->textInput($inputOptions)->label('Full Name', ['style' => 'color:#ccc']) ?>
 
-          <?= $form->field($user, 'login')->textInput(['readonly' => true] + $inputOptions)->label('Email (Login cannot be changed)', ['style' => 'color:#ccc']) ?>
+          <?= $form->field($user, 'email')->textInput($inputOptions)->label('Email', ['style' => 'color:#ccc']) ?>
 
-          <?= $form->field($user, 'password')->passwordInput(['placeholder' => 'Leave blank to keep current password'] + $inputOptions)->label('New Password', ['style' => 'color:#ccc']) ?>
+          <?= $form->field($user, 'password')->passwordInput(['placeholder' => 'Leave blank to keep current password', 'value' => ''] + $inputOptions)->label('New Password (Optional)', ['style' => 'color:#ccc']) ?>
 
           <?= $form->field($user, 'image')->fileInput(['style' => 'color: #ccc;'])->label('Avatar', ['style' => 'color:#ccc']) ?>
 

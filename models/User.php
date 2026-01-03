@@ -32,7 +32,8 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['name', 'email', 'password'], 'required'],
+            [['name', 'email'], 'required'],
+            [['password'], 'string', 'min' => 6],
             [['isAdmin'], 'integer'],
             [['name', 'email', 'password', 'image'], 'string', 'max' => 255],
             [['email'], 'unique'], // Логін (email) має бути унікальним

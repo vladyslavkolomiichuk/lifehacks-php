@@ -23,21 +23,21 @@ $this->title = 'Category: ' . $topic->name;
         <?php foreach ($articles as $article): ?>
           <article class="post" style="background-color: #1e1e1e; border: 1px solid #333; margin-bottom: 30px; border-radius: 5px; overflow: hidden;">
             <div class="post-thumb">
-              <a href="<?= Url::toRoute(['site/view', 'id' => $article->id]); ?>">
+              <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>">
                 <img src="<?= $article->getImage(); ?>" alt="<?= $article->title ?>" style="width:100%; object-fit: cover; height: 300px;">
               </a>
             </div>
             <div class="post-content" style="padding: 20px;">
               <header class="entry-header">
                 <h1 class="entry-title" style="margin-top: 10px;">
-                  <a href="<?= Url::toRoute(['site/view', 'id' => $article->id]); ?>" style="color: #fff; text-decoration: none;"><?= $article->title; ?></a>
+                  <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>" style="color: #fff; text-decoration: none;"><?= $article->title; ?></a>
                 </h1>
               </header>
               <div class="entry-content" style="color: #ccc; margin: 15px 0;">
                 <p><?= mb_strimwidth($article->description, 0, 200, "..."); ?></p>
               </div>
               <div class="btn-continue-reading">
-                <a href="<?= Url::toRoute(['site/view', 'id' => $article->id]); ?>" class="btn btn-primary" style="background-color: #bb86fc; border: none; color: #000; font-weight: bold;">Read More</a>
+                <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>" class="btn btn-primary" style="background-color: #bb86fc; border: none; color: #000; font-weight: bold;">Read More</a>
               </div>
             </div>
           </article>
@@ -60,7 +60,7 @@ $this->title = 'Category: ' . $topic->name;
         <ul class="list-group" style="list-style: none; padding: 0; margin-top: 15px;">
           <?php foreach ($topics as $t): ?>
             <li class="list-group-item d-flex justify-content-between align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #333; padding: 10px 0;">
-              <a href="<?= Url::to(['site/topic', 'id' => $t->id]) ?>" style="color: <?= ($t->id == $topic->id) ? '#03dac6' : '#ccc' ?>; text-decoration: none; font-size: 16px;">
+              <a href="<?= Url::to(['article/topic', 'id' => $t->id]) ?>" style="color: <?= ($t->id == $topic->id) ? '#03dac6' : '#ccc' ?>; text-decoration: none; font-size: 16px;">
                 <?= $t->name; ?>
               </a>
               <span class="badge bg-primary rounded-pill" style="background-color: #03dac6 !important; color: #000;"><?= $t->getArticles()->count(); ?></span>
@@ -74,13 +74,13 @@ $this->title = 'Category: ' . $topic->name;
         <?php foreach ($popular as $article): ?>
           <div class="media" style="margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
             <div class="media-left" style="float: left; margin-right: 15px;">
-              <a href="<?= Url::to(['site/view', 'id' => $article->id]) ?>">
+              <a href="<?= Url::to(['article/view', 'id' => $article->id]) ?>">
                 <img class="media-object" src="<?= $article->getImage(); ?>" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
               </a>
             </div>
             <div class="media-body">
               <h5 class="media-heading" style="margin-top: 0;">
-                <a href="<?= Url::to(['site/view', 'id' => $article->id]) ?>" style="color: #e0e0e0; font-size: 14px;"><?= $article->title; ?></a>
+                <a href="<?= Url::to(['article/view', 'id' => $article->id]) ?>" style="color: #e0e0e0; font-size: 14px;"><?= $article->title; ?></a>
               </h5>
             </div>
           </div>

@@ -31,7 +31,7 @@ $this->title = 'Login';
           ];
           ?>
 
-          <?= $form->field($model, 'username')->textInput(['autofocus' => true] + $inputOptions)->label('Email / Login', ['style' => 'color:#ccc']) ?>
+          <?= $form->field($model, 'email')->textInput(['autofocus' => true] + $inputOptions)->label('Email / Login', ['style' => 'color:#ccc']) ?>
 
           <?= $form->field($model, 'password')->passwordInput($inputOptions)->label('Password', ['style' => 'color:#ccc']) ?>
 
@@ -47,7 +47,7 @@ $this->title = 'Login';
         </div>
         <div class="card-footer text-center" style="border-top: 1px solid #333;">
           <span style="color: #777;">Don't have an account?</span>
-          <?= Html::a('Signup', ['site/signup'], ['class' => '', 'style' => 'color: #03dac6;']) ?>
+          <?= Html::a('Signup', ['auth/signup'], ['class' => '', 'style' => 'color: #03dac6;']) ?>
         </div>
       </div>
     </div>
