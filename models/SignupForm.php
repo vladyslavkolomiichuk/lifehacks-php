@@ -27,7 +27,7 @@ class SignupForm extends Model
       ['email', 'string', 'max' => 255],
 
       // ВАЖЛИВО: перевіряємо унікальність по колонці 'login' у таблиці User
-      ['email', 'unique', 'targetClass' => '\app\models\User', 'targetAttribute' => 'login', 'message' => 'Ця пошта вже зайнята.'],
+      ['email', 'unique', 'targetClass' => '\app\models\User', 'targetAttribute' => 'email', 'message' => 'Ця пошта вже зайнята.'],
 
       ['password', 'required'],
       ['password', 'string', 'min' => 6],

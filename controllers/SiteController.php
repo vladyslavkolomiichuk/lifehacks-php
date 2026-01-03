@@ -349,19 +349,25 @@ class SiteController extends Controller
      */
     public function actionSignup()
     {
-        $model = new SignupForm(); // Переконайтеся, що створили models/SignupForm.php
+        $model = new SignupForm(); // Або ваша модель форми реєстрації
 
-        if ($model->load(Yii::$app->request->post())) {
-            if ($user = $model->signup()) {
-                if (Yii::$app->getUser()->login($user)) {
-                    return $this->goHome();
-                }
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
+            $user = new User();
+            $user->name = $model->name;
+            $user->email = $model->email;
+
+            // ВАЖЛИВО: Використовуємо метод setPassword замість прямого присвоєння
+            // БУЛО: $user->password = $model->password;
+            // СТАЛО:
+            $user->setPassword($model->password);
+
+            if ($user->save()) {
+                return $this->redirect(['/site/login']);
             }
         }
 
-        return $this->render('signup', [
-            'model' => $model,
-        ]);
+        return $this->render('signup', ['model' => $model]);
     }
 
     /**

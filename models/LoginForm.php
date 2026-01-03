@@ -25,14 +25,18 @@ class LoginForm extends Model
     ];
   }
 
+  /**
+   * Validates the password.
+   * This method serves as the inline validation for password.
+   */
   public function validatePassword($attribute, $params)
   {
     if (!$this->hasErrors()) {
       $user = $this->getUser();
 
-      // Перевіряємо, чи це об'єкт класу User
-      if (!$user || !($user instanceof User) || !$user->validatePassword($this->password)) {
-        $this->addError($attribute, 'Невірний логін або пароль.');
+      // Тут має бути виклик методу з моделі User
+      if (!$user || !$user->validatePassword($this->password)) {
+        $this->addError($attribute, 'Incorrect username or password.');
       }
     }
   }
@@ -61,7 +65,7 @@ class LoginForm extends Model
   {
     if ($this->_user === false) {
       // Шукаємо користувача в БД
-      $this->_user = User::findOne(['login' => $this->username]);
+      $this->_user = User::findOne(['email' => $this->username]);
     }
 
     // Якщо користувача не знайдено, findOne поверне null.

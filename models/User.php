@@ -32,10 +32,10 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['name', 'login', 'password'], 'required'],
+            [['name', 'email', 'password'], 'required'],
             [['isAdmin'], 'integer'],
-            [['name', 'login', 'password', 'image'], 'string', 'max' => 255],
-            [['login'], 'unique'], // Логін (email) має бути унікальним
+            [['name', 'email', 'password', 'image'], 'string', 'max' => 255],
+            [['email'], 'unique'], // Логін (email) має бути унікальним
         ];
     }
 
@@ -66,7 +66,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findByUsername($username)
     {
-        return static::findOne(['login' => $username]);
+        return static::findOne(['email' => $username]);
     }
 
     /**
@@ -97,19 +97,19 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Перевірка пароля.
-     *
-     * @param string $password пароль для перевірки
-     * @return bool чи збігається пароль
+     * Генерує хеш пароля і записує його в атрибут password
+     */
+    public function setPassword($password)
+    {
+        $this->password = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    /**
+     * Перевіряє, чи співпадає введений пароль із збереженим хешем
      */
     public function validatePassword($password)
     {
-        // Варіант 1: Для нашого поточного коду (без шифрування, як у вас зараз)
-        return $this->password === $password;
-
-        /* Варіант 2: Якщо в майбутньому ви почнете хешувати паролі (рекомендовано):
         return Yii::$app->security->validatePassword($password, $this->password);
-        */
     }
 
     public function getArticles()
