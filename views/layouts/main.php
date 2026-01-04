@@ -18,6 +18,7 @@ AppAsset::register($this);
 <html lang="<?= Yii::$app->language ?>" class="h-100">
 
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <?php $this->registerCsrfMetaTags() ?>
@@ -109,6 +110,15 @@ AppAsset::register($this);
         $menuItems = [
             ['label' => 'Home', 'url' => ['article/index']],
         ];
+
+        if (!Yii::$app->user->isGuest && Yii::$app->user->identity->isAdmin == 1) {
+            $menuItems[] = [
+                'label' => '<i class="bi bi-speedometer2"></i> Admin Panel', // Додали іконку (спідометр)
+                'url' => ['/admin/default/index'], // Посилання на модуль адмінки
+                'encode' => false, // Дозволяємо HTML (для іконки)
+                'linkOptions' => ['class' => 'nav-link', 'style' => 'color: #ffca28; font-weight: bold;'] // Жовтий колір
+            ];
+        }
 
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Signup', 'url' => ['auth/signup']];

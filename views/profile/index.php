@@ -77,7 +77,7 @@ $avgViews = $totalArticles > 0 ? round($totalViews / $totalArticles) : 0;
       </div>
       <div class="d-flex justify-content-between align-items-center mb-3" style="border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
         <h2 style="color: #03dac6; margin: 0; font-size: 24px;">My Articles (<?= count($articles) ?>)</h2>
-        <?= Html::a('+ Create New', ['create-article'], ['class' => 'btn btn-success', 'style' => 'background-color: #03dac6; color: #000; font-weight: bold; border: none; padding: 8px 20px;']) ?>
+        <?= Html::a('+ Create New', ['article/create'], ['class' => 'btn btn-success', 'style' => 'background-color: #03dac6; color: #000; font-weight: bold; border: none; padding: 8px 20px;']) ?>
       </div>
 
       <?php if (empty($articles)): ?>
@@ -108,13 +108,13 @@ $avgViews = $totalArticles > 0 ? round($totalViews / $totalArticles) : 0;
 
                 <div class="col-md-3 col-xs-12 text-end" style="text-align: right;">
                   <div class="btn-group btn-group-sm">
-                    <?= Html::a('<i class="glyphicon glyphicon-pencil"></i>', ['update', 'id' => $article->id], [
+                    <?= Html::a('<i class="bi bi-pencil-fill"></i>', ['update', 'id' => $article->id], [
                       'class' => 'btn btn-primary',
                       'title' => 'Edit',
                       'style' => 'background-color: #bb86fc; border:none; color: #000;'
                     ]) ?>
 
-                    <?= Html::a('<i class="glyphicon glyphicon-trash"></i>', ['delete', 'id' => $article->id], [
+                    <?= Html::a('<i class="bi bi-trash-fill"></i>', ['delete', 'id' => $article->id], [
                       'class' => 'btn btn-danger',
                       'title' => 'Delete',
                       'style' => 'background-color: #cf6679; border:none; color: #000;',
