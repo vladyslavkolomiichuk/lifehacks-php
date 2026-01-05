@@ -32,7 +32,7 @@ AppAsset::register($this);
     <header id="header">
         <?php
         NavBar::begin([
-            'brandLabel' => 'LifeHacks Dark',
+            'brandLabel' => 'LifeHacks',
             'brandUrl' => Yii::$app->homeUrl,
             'options' => [
                 'class' => 'navbar navbar-expand-md navbar-dark fixed-top',

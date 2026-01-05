@@ -12,20 +12,22 @@ class AdminDashboardCest
 
   public function _before(FunctionalTester $I)
   {
-    // 1. Очищення
+    // 1. Повне очищення
     Comment::deleteAll();
     Article::deleteAll();
     Topic::deleteAll();
     User::deleteAll();
 
-    // 2. Створюємо Адміна (Користувач №1)
-    $admin = new User(['name' => 'Admin', 'email' => 'admin@test.com', 'password' => '123']);
+    // 2. Створюємо Адміна
+    $admin = new User(['name' => 'Admin', 'email' => 'admin@test.com']);
+    $admin->setPassword('123');
     $admin->isAdmin = 1;
     $admin->save(false);
     $this->adminId = $admin->id;
 
-    // 3. Створюємо Звичайного юзера (Користувач №2)
-    $user = new User(['name' => 'User', 'email' => 'user@test.com', 'password' => '123']);
+    // 3. Створюємо Звичайного юзера
+    $user = new User(['name' => 'User', 'email' => 'user@test.com']);
+    $user->setPassword('123');
     $user->isAdmin = 0;
     $user->save(false);
     $this->regularUserId = $user->id;
@@ -34,7 +36,7 @@ class AdminDashboardCest
     $topic = new Topic(['name' => 'Tech']);
     $topic->save(false);
 
-    // 5. Створюємо Статтю (100 переглядів)
+    // 5. Створюємо Статтю
     $article = new Article([
       'title' => 'Post 1',
       'topic_id' => $topic->id,
@@ -48,7 +50,8 @@ class AdminDashboardCest
     $comment = new Comment([
       'text' => 'Nice',
       'user_id' => $user->id,
-      'article_id' => $article->id
+      'article_id' => $article->id,
+      'date' => date('Y-m-d H:i:s')
     ]);
     $comment->save(false);
   }
@@ -57,12 +60,12 @@ class AdminDashboardCest
   public function checkAccessControl(FunctionalTester $I)
   {
     // Гість
-    $I->amOnPage(['admin/default/index']);
+    $I->amOnPage('/index-test.php?r=admin/default/index');
     $I->see('Login');
 
     // Звичайний юзер
     $I->amLoggedInAs($this->regularUserId);
-    $I->amOnPage(['admin/default/index']);
+    $I->amOnPage('/index-test.php?r=admin/default/index');
     $I->seeResponseCodeIs(403);
   }
 
@@ -70,30 +73,27 @@ class AdminDashboardCest
   public function checkDashboardStats(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
-    $I->amOnPage(['admin/default/index']);
+    $I->amOnPage('/index-test.php?r=admin/default/index');
 
     $I->see('Dashboard', 'h1');
 
-    // Перевіряємо цифри на картках:
+    // 1. Перевіряємо цифри на картках (використовуємо ваш CSS клас)
+    $I->see('2', '.stat-card-value'); // Users
+    $I->see('1', '.stat-card-value'); // Articles
+    $I->see('100', '.stat-card-value'); // Views
 
-    // Users: Ми створили Admin + User = 2
-    $I->see('Users');
-    $I->see('2', '.stat-card-value');
+    // 2. Перевіряємо тексти карток, щоб переконатися, що вони на місці
+    $I->see('Users', '.stat-card-title');
+    $I->see('Articles', '.stat-card-title');
+    $I->see('Comments', '.stat-card-title');
 
-    // Articles: Створили 1 статтю
-    $I->see('Articles');
-    $I->see('1', '.stat-card-value');
+    // 3. Перевіряємо кнопки в блоці Quick Actions
+    // Це найнадійніший спосіб перевірити навігацію в тесті
+    $I->see('Add Topic', 'a');
+    $I->see('Manage Admins', 'a');
+    $I->see('Manage Articles', 'a');
 
-    // Comments: Створили 1 коментар
-    $I->see('Comments');
-    // $I->see('1'); // Цю перевірку Codeception може сплутати з цифрою статей, тому пропускаємо або уточнюємо селектор
-
-    // Views: Ми дали статті 100 переглядів
-    $I->see('Total Views');
-    $I->see('100', '.stat-card-value');
-
-    // Перевіряємо наявність кнопок швидких дій
-    $I->seeLink('Manage Admins');
-    $I->seeLink('Manage Articles');
+    // Перевіряємо текст "View Details", який є у ваших картках
+    $I->see('View Details', 'a');
   }
 }

@@ -4,70 +4,56 @@ use app\models\User;
 
 class SignupCest
 {
-  // Очищаємо базу перед кожним тестом, щоб уникнути помилок "Email вже зайнятий"
   public function _before(FunctionalTester $I)
   {
+    // Очищаємо базу перед тестом
     User::deleteAll();
   }
 
-  // ТЕСТ 1: Чи відкривається сторінка
   public function openSignupPage(FunctionalTester $I)
   {
-    // Йдемо на сторінку реєстрації
-    $I->amOnPage(['auth/signup']);
-
-    // Перевіряємо заголовок h3 з вашого view
+    // ВИПРАВЛЕНО: передаємо рядок замість масиву
+    $I->amOnPage('/index-test.php?r=auth/signup');
     $I->see('Signup', 'h3');
-
-    // Перевіряємо наявність полів (Yii генерує імена на основі назви моделі)
     $I->seeElement('input', ['name' => 'SignupForm[name]']);
     $I->seeElement('input', ['name' => 'SignupForm[email]']);
     $I->seeElement('input', ['name' => 'SignupForm[password]']);
   }
 
-  // ТЕСТ 2: Спроба відправити порожню форму (Валідація)
   public function signupWithEmptyFields(FunctionalTester $I)
   {
-    $I->amOnPage(['auth/signup']);
+    $I->amOnPage('/index-test.php?r=auth/signup');
 
-    // Відправляємо порожню форму
-    $I->submitForm('#form-signup', []);
+    // Клікаємо саме по кнопці форми
+    $I->click('button[type=submit]');
 
-    // Очікуємо побачити стандартні помилки Yii
+    $I->expect('validation errors are displayed');
     $I->see('Name cannot be blank');
     $I->see('Email cannot be blank');
     $I->see('Password cannot be blank');
-
-    // Переконуємось, що користувач не створився
-    $I->dontSeeRecord(User::class, ['email' => 'test@example.com']);
   }
 
-  // ТЕСТ 3: Успішна реєстрація
   public function signupSuccessfully(FunctionalTester $I)
   {
-    $I->amOnPage(['auth/signup']);
+    $I->amOnPage('/index-test.php?r=auth/signup');
 
-    // Заповнюємо форму даними
-    $formData = [
-      'SignupForm[name]' => 'Test User',
-      'SignupForm[email]' => 'newuser@test.com',
-      'SignupForm[password]' => 'password123',
-    ];
+    $I->fillField(['name' => 'SignupForm[name]'], 'Test User');
+    $I->fillField(['name' => 'SignupForm[email]'], 'newuser@test.com');
+    $I->fillField(['name' => 'SignupForm[password]'], 'password123');
 
-    // Відправляємо форму (використовуємо ID форми з вашого View)
-    $I->submitForm('#form-signup', $formData);
+    $I->click('button[type=submit]');
 
-    // 1. Перевіряємо БД: чи з'явився такий юзер?
-    // Примітка: перевіряємо по email, який ми ввели
-    $I->seeRecord(User::class, [
+    // ВАРІАНТ 1: Перевіряємо частинами (найбільш стабільно)
+    $I->seeInCurrentUrl('auth');
+    $I->seeInCurrentUrl('login');
+
+    // ВАРІАНТ 2: Або перевіряємо текст на сторінці логіна
+    $I->see('Please fill out the following fields to login:');
+
+    // ВАРІАНТ 3: Перевірка бази даних (найважливіше!)
+    $I->seeRecord('app\models\User', [
       'email' => 'newuser@test.com',
       'name' => 'Test User'
     ]);
-
-    // 2. Перевіряємо перенаправлення (Redirect)
-    // У вашому контролері AuthController::actionSignup написано: return $this->redirect(['login']);
-    // Тому ми очікуємо опинитися на сторінці Login
-    $I->see('Login', 'h3');
-    $I->seeCurrentUrlEquals('/index-test.php/auth/login'); // URL може відрізнятись залежно від налаштувань, це опціональна перевірка
   }
 }

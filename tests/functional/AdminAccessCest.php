@@ -9,6 +9,7 @@ class AdminAccessCest
 
   public function _before(FunctionalTester $I)
   {
+    // Очищаємо базу перед кожним тестом
     User::deleteAll();
 
     // 1. Створюємо Адміна (isAdmin = 1)
@@ -16,7 +17,7 @@ class AdminAccessCest
     $admin->name = 'Admin';
     $admin->email = 'admin@test.com';
     $admin->setPassword('admin123');
-    $admin->isAdmin = 1; // <--- ВАЖЛИВО
+    $admin->isAdmin = 1;
     $admin->save(false);
     $this->adminId = $admin->id;
 
@@ -25,7 +26,7 @@ class AdminAccessCest
     $user->name = 'Simple User';
     $user->email = 'user@test.com';
     $user->setPassword('user123');
-    $user->isAdmin = 0; // <--- ВАЖЛИВО
+    $user->isAdmin = 0;
     $user->save(false);
     $this->regularUserId = $user->id;
   }
@@ -33,41 +34,46 @@ class AdminAccessCest
   // СЦЕНАРІЙ 1: Гість (не залогінений) пробує зайти в адмінку
   public function guestTryToAccessAdmin(FunctionalTester $I)
   {
-    // Припускаємо, що маршрут адмінки '/admin' або '/admin/index'
-    // Змініть це на ваш реальний URL
-    $I->amOnPage(['/admin/index']);
+    $I->amOnPage('/index-test.php?r=admin/default/index');
 
-    // Його має перекинути на логін
-    $I->see('Login');
-    $I->dontSee('Dashboard'); // Не має бачити контент адмінки
+    // Варіант 1: Шукаємо частину рядка в URL без спецсимволів
+    $I->seeInCurrentUrl('auth');
+    $I->seeInCurrentUrl('login');
+
+    // Варіант 2: Перевіряємо заголовок форми, що є 100% доказом того, що ми на логіні
+    $I->see('Login', 'h3');
+    $I->see('Please fill out the following fields to login:');
   }
 
-  // СЦЕНАРІЙ 2: Звичайний юзер пробує зайти
+  // СЦЕНАРІЙ 2: Звичайний юзер пробує зайти в адмінку
   public function regularUserTryToAccessAdmin(FunctionalTester $I)
   {
+    // amLoggedInAs автоматично знаходить юзера в БД за ID і логінить його в сесію
     $I->amLoggedInAs($this->regularUserId);
-    $I->amOnPage(['/admin/index']);
 
-    // Тут залежить від вашої реалізації:
-    // АБО він бачить 403 Forbidden
-    // АБО його кидає на головну
-    // АБО його кидає на логін
+    $I->amOnPage('/index-test.php?r=admin/default/index');
 
-    // Найчастіше в Yii2 це помилка 403
+    // Якщо у вас налаштовано RBAC або AccessControl (matchCallback),
+    // то при спробі доступу без прав isAdmin=1 зазвичай повертається 403 помилка.
     $I->seeResponseCodeIs(403);
-    // Або перевірка тексту
+
+    // Перевіряємо текст стандартної помилки Yii2
     $I->see('Forbidden');
+    $I->dontSee('Admin Panel');
   }
 
-  // СЦЕНАРІЙ 3: Адмін заходить
+  // СЦЕНАРІЙ 3: Адмін успішно заходить
   public function adminAccess(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
-    $I->amOnPage(['/admin/index']);
 
+    $I->amOnPage('/index-test.php?r=admin/default/index');
+
+    // Перевіряємо успішний статус
     $I->seeResponseCodeIs(200);
-    // Перевіряємо текст, який є тільки в адмінці
-    // Наприклад, заголовок "Control Panel" або "Manage Articles"
+
+    // Перевіряємо наявність специфічного тексту адмінки (наприклад, заголовок)
     $I->see('Admin');
+    $I->dontSee('Please fill out the following fields to login:');
   }
 }

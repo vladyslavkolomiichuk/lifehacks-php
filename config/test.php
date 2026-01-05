@@ -30,6 +30,9 @@ return [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
+            'loginUrl' => ['auth/login'],
+            'enableAutoLogin' => false,
+            'enableSession' => true,
         ],
         'request' => [
             'cookieValidationKey' => 'test',
@@ -43,4 +46,10 @@ return [
         ],
     ],
     'params' => $params,
+    'modules' => [
+        'admin' => [
+            'class' => 'app\modules\admin\Module',
+            'layout' => 'main',
+        ],
+    ],
 ];

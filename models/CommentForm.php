@@ -25,6 +25,7 @@ class CommentForm extends Model
     $comment->text = $this->comment;
     $comment->user_id = Yii::$app->user->id; // Поточний юзер
     $comment->article_id = $article_id;
+    $comment->parent_id = $this->parentId;
     $comment->date = date('Y-m-d');
     $comment->delete = 0;
     return $comment->save();

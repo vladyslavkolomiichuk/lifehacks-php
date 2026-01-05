@@ -112,10 +112,11 @@ class Article extends \yii\db\ActiveRecord
      */
     public function isLikedByCurrentUser()
     {
+        // Якщо користувач не залогінений, він апріорі не міг лайкнути
         if (Yii::$app->user->isGuest) {
             return false;
         }
-        // Шукаємо запис у таблиці vote
+
         return Vote::find()
             ->where(['user_id' => Yii::$app->user->id, 'article_id' => $this->id])
             ->exists();

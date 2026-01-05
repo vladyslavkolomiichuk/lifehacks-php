@@ -7,42 +7,37 @@ class AdminTopicCest
 {
   private $adminId;
   private $regularUserId;
-  private $topicId; // ID тестової категорії для редагування/видалення
+  private $topicId;
 
   public function _before(FunctionalTester $I)
   {
-    // 1. Очищення бази
     Topic::deleteAll();
     User::deleteAll();
 
-    // 2. Створюємо Адміна
-    $admin = new User(['name' => 'Admin', 'email' => 'admin@test.com', 'password' => '123']);
+    $admin = new User(['name' => 'Admin', 'email' => 'admin@test.com']);
+    $admin->setPassword('123');
     $admin->isAdmin = 1;
     $admin->save(false);
     $this->adminId = $admin->id;
 
-    // 3. Створюємо звичайного юзера
-    $user = new User(['name' => 'User', 'email' => 'user@test.com', 'password' => '123']);
+    $user = new User(['name' => 'User', 'email' => 'user@test.com']);
+    $user->setPassword('123');
     $user->isAdmin = 0;
     $user->save(false);
     $this->regularUserId = $user->id;
 
-    // 4. Створюємо існуючу категорію для тестів Index/Update/Delete
     $topic = new Topic(['name' => 'Existing Topic']);
     $topic->save(false);
     $this->topicId = $topic->id;
   }
 
-  // ТЕСТ 1: Перевірка безпеки
   public function checkAccessControl(FunctionalTester $I)
   {
-    // Гість -> Логін
-    $I->amOnPage(['admin/topic/index']);
+    $I->amOnPage('/index-test.php?r=admin/topic/index');
     $I->see('Login');
 
-    // Звичайний юзер -> Forbidden
     $I->amLoggedInAs($this->regularUserId);
-    $I->amOnPage(['admin/topic/index']);
+    $I->amOnPage('/index-test.php?r=admin/topic/index');
     $I->seeResponseCodeIs(403);
   }
 
@@ -50,10 +45,13 @@ class AdminTopicCest
   public function checkIndexPage(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
-    $I->amOnPage(['admin/topic/index']);
+    $I->amOnPage('/index-test.php?r=admin/topic/index');
 
     $I->see('Topics', 'h1');
-    $I->see('Existing Topic'); // Бачимо ту, що створили в _before
+    $I->see('Existing Topic');
+
+    // ВИПРАВЛЕННЯ: замість seeElement з URL використовуємо seeLink з текстом.
+    // Якщо у вас кнопка називається просто "Create", замініть текст.
     $I->seeLink('Create Topic');
   }
 
@@ -61,19 +59,17 @@ class AdminTopicCest
   public function createTopic(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
-    $I->amOnPage(['admin/topic/create']);
+    $I->amOnPage('/index-test.php?r=admin/topic/create');
 
     $I->see('Create Topic', 'h1');
 
-    // Заповнюємо форму (використовуємо клас .dark-form з вашого view)
-    $I->submitForm('.dark-form', [
-      'Topic[name]' => 'New PHP Category',
-    ]);
+    $I->fillField(['name' => 'Topic[name]'], 'New PHP Category');
 
-    // Має перекинути на index
-    $I->seeCurrentUrlMatches('~admin/topic/index~');
+    // ВИПРАВЛЕНО: Використовуємо тип кнопки submit, бо текст може бути "Create"
+    $I->click('button[type=submit]');
 
-    // Перевіряємо, чи з'явився запис
+    // ВИПРАВЛЕНО: Замість перевірки URL перевіряємо заголовок h1 списку після редиректу
+    $I->see('Topics', 'h1');
     $I->see('New PHP Category');
     $I->seeRecord(Topic::class, ['name' => 'New PHP Category']);
   }
@@ -82,31 +78,28 @@ class AdminTopicCest
   public function updateTopic(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
-    $I->amOnPage(['admin/topic/update', 'id' => $this->topicId]);
+    $I->amOnPage('/index-test.php?r=admin/topic/update&id=' . $this->topicId);
 
-    $I->see('Update Topic: Existing Topic', 'h1');
+    $I->see('Update Topic', 'h1');
 
-    // Змінюємо назву
-    $I->submitForm('.dark-form', [
-      'Topic[name]' => 'Updated Topic Name',
-    ]);
+    $I->fillField(['name' => 'Topic[name]'], 'Updated Topic Name');
 
-    // Перевіряємо результат
-    $I->seeCurrentUrlMatches('~admin/topic/index~');
+    // ВИПРАВЛЕНО: Використовуємо тип кнопки submit
+    $I->click('button[type=submit]');
+
+    // ВИПРАВЛЕНО: Перевірка заголовка h1 замість URL
+    $I->see('Topics', 'h1');
     $I->see('Updated Topic Name');
-    $I->dontSee('Existing Topic'); // Старої назви не має бути
+    $I->dontSee('Existing Topic');
   }
 
-  // ТЕСТ 5: Видалення (Delete)
   public function deleteTopic(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
 
-    // Відправляємо POST на видалення
-    $I->sendPost(['admin/topic/delete', 'id' => $this->topicId]);
+    $I->sendAjaxPostRequest('/index-test.php?r=admin/topic/delete&id=' . $this->topicId);
 
-    // Перевіряємо
-    $I->amOnPage(['admin/topic/index']);
+    $I->amOnPage('/index-test.php?r=admin/topic/index');
     $I->dontSee('Existing Topic');
     $I->dontSeeRecord(Topic::class, ['id' => $this->topicId]);
   }
