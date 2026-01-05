@@ -4,23 +4,26 @@ use yii\bootstrap5\Html;
 use yii\widgets\DetailView;
 
 $this->title = 'Comment #' . $model->id;
-$this->params['breadcrumbs'][] = ['label' => 'Comments', 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="comment-view">
-  <h1><?= Html::encode($this->title) ?></h1>
 
-  <p>
-    <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
-    <?= Html::a('Delete', ['delete', 'id' => $model->id], [
-      'class' => 'btn btn-danger',
-      'data' => ['confirm' => 'Are you sure?', 'method' => 'post'],
-    ]) ?>
-    <?= Html::a('Back to List', ['index'], ['class' => 'btn btn-secondary']) ?>
-  </p>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-white m-0"><?= Html::encode($this->title) ?></h1>
+    <div>
+      <?= Html::a('Back to List', ['index'], ['class' => 'btn btn-secondary fw-bold me-2']) ?>
+      <?= Html::a('Update', ['update', 'id' => $model->id], ['class' => 'btn btn-primary fw-bold me-2']) ?>
+      <?= Html::a('Delete', ['delete', 'id' => $model->id], [
+        'class' => 'btn btn-danger fw-bold',
+        'data' => [
+          'confirm' => 'Are you sure you want to delete this item?',
+          'method' => 'post',
+        ],
+      ]) ?>
+    </div>
+  </div>
 
-  <div class="card bg-dark border-secondary">
-    <div class="card-body">
+  <div class="card bg-dark border-secondary shadow-sm">
+    <div class="card-body p-0">
       <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -35,12 +38,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'article_id',
             'label' => 'Article',
             'format' => 'raw',
-            'value' => Html::a($model->article->title, ['/admin/article/view', 'id' => $model->article_id]),
+            'value' => Html::a(
+              $model->article->title,
+              ['/admin/article/view', 'id' => $model->article_id],
+              ['class' => 'text-decoration-none', 'style' => 'color: #03dac6; font-weight: bold;']
+            ),
           ],
           'date',
         ],
-        'options' => ['class' => 'table table-striped table-bordered table-dark detail-view'],
+        // Темна таблиця, клас detail-view для стилів шрифтів
+        'options' => ['class' => 'table table-dark table-bordered detail-view mb-0'],
       ]) ?>
     </div>
   </div>
+
 </div>

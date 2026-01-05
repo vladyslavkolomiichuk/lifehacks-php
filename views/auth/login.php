@@ -31,7 +31,7 @@ $this->title = 'Login';
           ];
           ?>
 
-          <?= $form->field($model, 'email')->textInput(['autofocus' => true] + $inputOptions)->label('Email / Login', ['style' => 'color:#ccc']) ?>
+          <?= $form->field($model, 'email')->textInput(['autofocus' => true] + $inputOptions)->label('Email', ['style' => 'color:#ccc']) ?>
 
           <?= $form->field($model, 'password')->passwordInput($inputOptions)->label('Password', ['style' => 'color:#ccc']) ?>
 

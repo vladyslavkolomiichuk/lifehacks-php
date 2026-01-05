@@ -8,15 +8,22 @@ use yii\bootstrap5\ActiveForm;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="comment-form card bg-dark border-secondary">
+<div class="comment-form card bg-dark border-secondary shadow-sm">
   <div class="card-body">
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin([
+      'options' => ['class' => 'dark-form'] // Підключаємо наші глобальні стилі
+    ]); ?>
 
-    <?= $form->field($model, 'text')->textarea(['rows' => 6, 'style' => 'background:#2d2d2d; color:#fff; border:1px solid #444;']) ?>
+    <?= $form->field($model, 'text')->textarea([
+      'rows' => 6,
+      'placeholder' => 'Edit the comment content here...'
+    ]) ?>
 
-    <div class="form-group mt-3">
-      <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
-      <?= Html::a('Cancel', ['index'], ['class' => 'btn btn-secondary']) ?>
+    <div class="form-group mt-4 pt-3 border-top border-secondary">
+      <?= Html::submitButton('<i class="bi bi-check-lg"></i> Save', [
+        'class' => 'btn btn-success fw-bold px-4'
+      ]) ?>
+      <?= Html::a('Cancel', ['index'], ['class' => 'btn btn-outline-secondary ms-2']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

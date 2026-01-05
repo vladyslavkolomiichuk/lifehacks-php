@@ -78,11 +78,6 @@ class User extends ActiveRecord implements IdentityInterface
         return $this->id;
     }
 
-    /**
-     * Повертає ключ автентифікації (для cookie "Запам'ятати мене").
-     * Оскільки в нашій простій таблиці немає поля auth_key, повертаємо null або можна додати поле в БД.
-     * Для курсової часто достатньо заглушки, якщо "remember me" не критичний.
-     */
     public function getAuthKey()
     {
         // У повноцінному проекті тут треба повертати $this->auth_key;
@@ -117,5 +112,19 @@ class User extends ActiveRecord implements IdentityInterface
     {
         // Зв'язок: User має багато Articles (по полю user_id)
         return $this->hasMany(Article::class, ['user_id' => 'id']);
+    }
+
+    public function getThumb()
+    {
+        // Шлях до папки, де лежать файли
+        $path = Yii::getAlias('@webroot/uploads/') . $this->image;
+
+        // Перевіряємо: чи записано щось в БД, і чи існує файл фізично
+        if ($this->image && file_exists($path)) {
+            return '/uploads/' . $this->image;
+        }
+
+        // Якщо фото немає - повертаємо заглушку
+        return '/uploads/no-image.png';
     }
 }

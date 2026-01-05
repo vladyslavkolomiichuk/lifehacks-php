@@ -4,7 +4,6 @@
 /* @var $content string */
 
 use app\assets\AppAsset;
-// use app\widgets\Alert; // Вимкнули старий віджет
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
 use yii\bootstrap5\Html;
@@ -25,73 +24,6 @@ AppAsset::register($this);
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
 
-    <style>
-        body,
-        html {
-            background-color: #121212 !important;
-            color: #e0e0e0;
-            height: 100%;
-        }
-
-        .wrap {
-            min-height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .content-container {
-            flex: 1;
-            padding-top: 70px;
-        }
-
-        .navbar-dark {
-            background-color: #1f1f1f !important;
-            border-bottom: 1px solid #333;
-        }
-
-        .navbar-dark .navbar-brand {
-            color: #fff !important;
-        }
-
-        .navbar-dark .nav-link {
-            color: #ccc !important;
-        }
-
-        .navbar-dark .nav-link:hover {
-            color: #fff !important;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: #ccc;
-            padding: 8px;
-            text-decoration: none;
-        }
-
-        .logout-btn:hover {
-            color: #fff;
-        }
-
-        .footer {
-            background-color: #000;
-            border-top: 1px solid #333;
-            margin-top: auto;
-        }
-
-        .breadcrumb {
-            background-color: transparent;
-        }
-
-        .breadcrumb-item.active {
-            color: #999;
-        }
-
-        /* Стиль для Toasts (щоб текст був читабельний) */
-        div:where(.swal2-container) h2:where(.swal2-title) {
-            color: #fff !important;
-        }
-    </style>
 </head>
 
 <body class="d-flex flex-column h-100">
@@ -113,10 +45,11 @@ AppAsset::register($this);
 
         if (!Yii::$app->user->isGuest && Yii::$app->user->identity->isAdmin == 1) {
             $menuItems[] = [
-                'label' => '<i class="bi bi-speedometer2"></i> Admin Panel', // Додали іконку (спідометр)
-                'url' => ['/admin/default/index'], // Посилання на модуль адмінки
-                'encode' => false, // Дозволяємо HTML (для іконки)
-                'linkOptions' => ['class' => 'nav-link', 'style' => 'color: #ffca28; font-weight: bold;'] // Жовтий колір
+                'label' => 'Admin Panel',
+                'url' => ['/admin/default/index'],
+                'encode' => false,
+                // ДОДАНО: !important після кольору
+                'linkOptions' => ['class' => 'nav-link', 'style' => 'color: #ffca28 !important; font-weight: bold;']
             ];
         }
 
@@ -130,7 +63,8 @@ AppAsset::register($this);
                 . Html::beginForm(['auth/logout'])
                 . Html::submitButton(
                     'Logout',
-                    ['class' => 'nav-link logout-btn', 'style' => 'color: #ff6b6b;']
+                    // ДОДАНО: !important після кольору
+                    ['class' => 'nav-link logout-btn', 'style' => 'color: #cf6679 !important;']
                 )
                 . Html::endForm()
                 . '</li>';
@@ -165,7 +99,6 @@ AppAsset::register($this);
             shareButtons.forEach(button => {
                 button.addEventListener('click', async (e) => {
                     e.preventDefault();
-
                     const title = button.getAttribute('data-title');
                     const url = button.getAttribute('data-url');
                     const text = 'Check out this helpful tip on LifeHacks!';
@@ -173,10 +106,8 @@ AppAsset::register($this);
                     const showSuccess = () => {
                         const originalContent = button.innerHTML;
                         const originalColor = button.style.color;
-
-                        button.innerHTML = '<i class="glyphicon glyphicon-ok"></i> Copied!';
+                        button.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
                         button.style.color = '#03dac6';
-
                         setTimeout(() => {
                             button.innerHTML = originalContent;
                             button.style.color = originalColor;
@@ -211,16 +142,15 @@ AppAsset::register($this);
                         textArea.value = text;
                         textArea.style.position = "fixed";
                         textArea.style.left = "-9999px";
-                        textArea.style.top = "0";
                         document.body.appendChild(textArea);
                         textArea.focus();
                         textArea.select();
                         try {
                             var successful = document.execCommand('copy');
                             if (successful) showSuccess();
-                            else alert('Unable to copy link manually.');
+                            else alert('Unable to copy link.');
                         } catch (err) {
-                            alert('Could not copy link: ' + text);
+                            alert('Could not copy link');
                         }
                         document.body.removeChild(textArea);
                     }
@@ -232,38 +162,31 @@ AppAsset::register($this);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <?php
-    // Отримуємо всі повідомлення з сесії
     $flashes = Yii::$app->session->getAllFlashes();
     if (!empty($flashes)) {
-        // Базові налаштування
         $toastConfig = [
             'toast' => true,
             'position' => 'bottom-end',
             'showConfirmButton' => false,
             'timer' => 3000,
             'timerProgressBar' => true,
-            'background' => '#333', // Темний фон
-            'color' => '#fff',      // Білий текст
+            'background' => '#333',
+            'color' => '#fff',
             'didOpen' => 'js:function(toast) {
                 toast.addEventListener("mouseenter", Swal.stopTimer)
                 toast.addEventListener("mouseleave", Swal.resumeTimer)
             }'
         ];
-
         foreach ($flashes as $type => $message) {
-            // Конвертація типів Yii в типи SweetAlert
             $icon = 'info';
             if ($type === 'success') $icon = 'success';
             if ($type === 'danger' || $type === 'error') $icon = 'error';
             if ($type === 'warning') $icon = 'warning';
 
-            // Формуємо налаштування для конкретного повідомлення
             $jsConfig = \yii\helpers\Json::encode(array_merge($toastConfig, [
                 'icon' => $icon,
                 'title' => $message
             ]));
-
-            // Реєструємо JS код, який запуститься після завантаження сторінки
             $this->registerJs("Swal.fire($jsConfig);");
         }
     }

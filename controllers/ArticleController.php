@@ -199,29 +199,34 @@ class ArticleController extends Controller
     ]);
   }
 
-  /**
-   * Пошук
-   */
-  public function actionSearch($q = null)
+  public function actionSearch($q)
   {
     $query = Article::find();
-    if ($q) {
-      $query->where(['like', 'title', $q])
-        ->orWhere(['like', 'description', $q]);
-      // ->orWhere(['like', 'tag', $q]); // якщо є теги
-    }
 
-    $count = $query->count();
-    $pagination = new Pagination(['totalCount' => $count, 'pageSize' => 5]);
-    $articles = $query->offset($pagination->offset)->limit($pagination->limit)->all();
+    // Логіка пошуку: (Title схожий на Q) АБО (Tag схожий на Q)
+    // Ми прибрали description, щоб шукати тільки по заголовку і тегам, як ви просили
+    $query->where(['like', 'title', $q])
+      ->orWhere(['like', 'tag', $q]);
+
+    $pagination = new Pagination([
+      'defaultPageSize' => 6,
+      'totalCount' => $query->count(),
+    ]);
+
+    $articles = $query->offset($pagination->offset)
+      ->limit($pagination->limit)
+      ->all();
+
+    // Дані для сайдбару
+    $popular = Article::find()->orderBy('viewed DESC')->limit(3)->all();
+    $topics = \app\models\Topic::find()->all();
 
     return $this->render('search', [
       'articles' => $articles,
       'pagination' => $pagination,
       'q' => $q,
-      'popular' => $this->getPopular(),
-      'recent' => $this->getRecent(),
-      'topics' => Topic::find()->all(),
+      'popular' => $popular,
+      'topics' => $topics,
     ]);
   }
 

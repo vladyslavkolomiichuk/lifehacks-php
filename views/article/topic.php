@@ -4,89 +4,143 @@ use yii\helpers\Url;
 use yii\widgets\LinkPager;
 use yii\helpers\Html;
 
-$this->title = 'Category: ' . $topic->name;
+/* @var $this yii\web\View */
+/* @var $articles app\models\Article[] */
+/* @var $pagination yii\data\Pagination */
+/* @var $popular app\models\Article[] */
+/* @var $topics app\models\Topic[] */
+/* @var $topic app\models\Topic */
+
+$this->title = $topic->name;
 ?>
 
 <div class="site-topic">
   <div class="row">
 
     <div class="col-md-8">
-      <div class="category-header" style="margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-        <h1 style="color: #fff;">Category: <span style="color: #03dac6;"><?= $topic->name ?></span></h1>
+
+      <div class="mb-4 pb-2 border-bottom border-secondary category-header">
+        <h1 class="text-white">Category: <span style="color: #03dac6;"><?= Html::encode($topic->name) ?></span></h1>
       </div>
 
-      <?php if (empty($articles)): ?>
-        <div class="alert alert-warning" style="background-color: #333; border: none; color: #ccc;">
-          No articles found in this category yet.
-        </div>
-      <?php else: ?>
-        <?php foreach ($articles as $article): ?>
-          <article class="post" style="background-color: #1e1e1e; border: 1px solid #333; margin-bottom: 30px; border-radius: 5px; overflow: hidden;">
-            <div class="post-thumb">
-              <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>">
-                <img src="<?= $article->getImage(); ?>" alt="<?= $article->title ?>" style="width:100%; object-fit: cover; height: 300px;">
-              </a>
-            </div>
-            <div class="post-content" style="padding: 20px;">
-              <header class="entry-header">
-                <h1 class="entry-title" style="margin-top: 10px;">
-                  <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>" style="color: #fff; text-decoration: none;"><?= $article->title; ?></a>
-                </h1>
-              </header>
-              <div class="entry-content" style="color: #ccc; margin: 15px 0;">
-                <p><?= mb_strimwidth($article->description, 0, 200, "..."); ?></p>
-              </div>
-              <div class="btn-continue-reading">
-                <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>" class="btn btn-primary" style="background-color: #bb86fc; border: none; color: #000; font-weight: bold;">Read More</a>
-              </div>
-            </div>
-          </article>
-        <?php endforeach; ?>
+      <div class="row">
+        <?php if (!empty($articles)): ?>
+          <?php foreach ($articles as $article): ?>
+            <div class="col-md-12 mb-4">
+              <article class="article-card shadow-sm mb-4">
+                <div class="card-img-top-wrapper">
+                  <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>">
+                    <img src="<?= $article->getImage(); ?>" class="card-img-top" alt="<?= Html::encode($article->title) ?>">
+                  </a>
+                </div>
 
-        <div class="text-center">
-          <?= LinkPager::widget([
-            'pagination' => $pagination,
-            'options' => ['class' => 'pagination justify-content-center'],
-            'linkOptions' => ['class' => 'page-link', 'style' => 'background: #333; border-color: #444; color: #fff;'],
-            'disabledListItemSubTagOptions' => ['class' => 'page-link', 'style' => 'background: #222; border-color: #444; color: #555;']
-          ]) ?>
-        </div>
-      <?php endif; ?>
+                <div class="card-body">
+                  <div>
+                    <a href="<?= Url::to(['article/topic', 'id' => $article->topic->id]) ?>" class="text-decoration-none">
+                      <span class="bg-teal text-uppercase"><?= Html::encode($article->topic->name) ?></span>
+                    </a>
+                  </div>
+
+                  <h2 class="article-title">
+                    <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>">
+                      <?= Html::encode($article->title); ?>
+                    </a>
+                  </h2>
+
+                  <div class="article-excerpt">
+                    <p><?= mb_strimwidth(strip_tags($article->description), 0, 200, "..."); ?></p>
+                  </div>
+
+                  <div class="mb-3">
+                    <a href="<?= Url::toRoute(['article/view', 'id' => $article->id]); ?>" class="btn-purple">Read More</a>
+                  </div>
+
+                  <div class="article-footer">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-person-circle me-1"></i>
+                      <span class="me-3"><?= Html::encode($article->user->name); ?></span>
+                      <i class="bi bi-calendar-event me-1"></i>
+                      <span><?= Yii::$app->formatter->asDate($article->date, 'medium'); ?></span>
+                    </div>
+
+                    <div class="d-flex align-items-center">
+                      <?php $isLiked = $article->isLikedByCurrentUser(); ?>
+                      <i class="bi bi-heart-fill me-1" style="color: <?= $isLiked ? '#cf6679' : '#777' ?>;"></i>
+                      <span><?= (int)$article->upvotes ?></span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <div class="col-md-12">
+            <div class="alert alert-dark border border-secondary text-center py-5">
+              <h4>No articles found in this category.</h4>
+              <p class="text-muted">Check back later for updates!</p>
+              <a href="<?= Url::to(['article/index']) ?>" class="btn btn-purple mt-3">Go Back Home</a>
+            </div>
+          </div>
+        <?php endif; ?>
+      </div>
+
+      <div class="d-flex justify-content-center mt-4 mb-5">
+        <?= LinkPager::widget([
+          'pagination' => $pagination,
+          'options' => ['class' => 'pagination'],
+          'linkContainerOptions' => ['class' => 'page-item'],
+          'linkOptions' => ['class' => 'page-link'],
+          'disabledListItemSubTagOptions' => ['class' => 'page-link'],
+          'activePageCssClass' => 'active',
+        ]) ?>
+      </div>
     </div>
 
     <div class="col-md-4">
-      <div class="widget" style="background-color: #1e1e1e; padding: 20px; border: 1px solid #333; margin-bottom: 30px; border-radius: 5px;">
-        <h3 class="widget-title" style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px;">Categories</h3>
-        <ul class="list-group" style="list-style: none; padding: 0; margin-top: 15px;">
+
+      <div class="widget">
+        <h3 class="widget-title">Categories</h3>
+        <ul class="list-group list-group-flush">
           <?php foreach ($topics as $t): ?>
-            <li class="list-group-item d-flex justify-content-between align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #333; padding: 10px 0;">
-              <a href="<?= Url::to(['article/topic', 'id' => $t->id]) ?>" style="color: <?= ($t->id == $topic->id) ? '#03dac6' : '#ccc' ?>; text-decoration: none; font-size: 16px;">
-                <?= $t->name; ?>
+            <li class="list-group-item d-flex justify-content-between align-items-center category-item"
+              style="background: transparent; border-bottom: 1px solid #2d2d2d; padding: 12px 0;">
+
+              <a href="<?= Url::to(['article/topic', 'id' => $t->id]) ?>"
+                class="text-decoration-none category-link <?= ($t->id == $topic->id) ? 'active' : '' ?>"
+                class="text-decoration-none" style="color: #ccc;">
+                <?= Html::encode($t->name); ?>
               </a>
-              <span class="badge bg-primary rounded-pill" style="background-color: #03dac6 !important; color: #000;"><?= $t->getArticles()->count(); ?></span>
+
+              <span class="badge rounded-pill"
+                style="background-color: <?= ($t->id == $topic->id) ? '#bb86fc' : '#03dac6' ?>; color: #000;">
+                <?= $t->getArticles()->count(); ?>
+              </span>
             </li>
           <?php endforeach; ?>
         </ul>
       </div>
 
-      <div class="widget" style="background-color: #1e1e1e; padding: 20px; border: 1px solid #333; border-radius: 5px;">
-        <h3 class="widget-title" style="color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px;">Popular Posts</h3>
-        <?php foreach ($popular as $article): ?>
-          <div class="media" style="margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-            <div class="media-left" style="float: left; margin-right: 15px;">
-              <a href="<?= Url::to(['article/view', 'id' => $article->id]) ?>">
-                <img class="media-object" src="<?= $article->getImage(); ?>" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
-              </a>
-            </div>
-            <div class="media-body">
-              <h5 class="media-heading" style="margin-top: 0;">
-                <a href="<?= Url::to(['article/view', 'id' => $article->id]) ?>" style="color: #e0e0e0; font-size: 14px;"><?= $article->title; ?></a>
+      <div class="widget">
+        <h3 class="widget-title">Popular Posts</h3>
+        <?php foreach ($popular as $popArticle): ?>
+          <div class="popular-post-item">
+            <a href="<?= Url::to(['article/view', 'id' => $popArticle->id]) ?>">
+              <img class="popular-img" src="<?= $popArticle->getImage(); ?>" alt="<?= Html::encode($popArticle->title) ?>">
+            </a>
+            <div class="popular-info">
+              <h5>
+                <a href="<?= Url::to(['article/view', 'id' => $popArticle->id]) ?>">
+                  <?= Html::encode($popArticle->title); ?>
+                </a>
               </h5>
+              <span class="popular-date">
+                <i class="bi bi-calendar3 me-1"></i> <?= Yii::$app->formatter->asDate($popArticle->date, 'medium'); ?>
+              </span>
             </div>
           </div>
         <?php endforeach; ?>
       </div>
-    </div>
 
+    </div>
   </div>
 </div>

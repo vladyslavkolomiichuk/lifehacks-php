@@ -22,39 +22,6 @@ AppAsset::register($this);
   <title>Admin Panel - <?= Html::encode($this->title) ?></title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <?php $this->head() ?>
-  <style>
-    body {
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-
-    .card {
-      background-color: #1e1e1e;
-      border: 1px solid #333;
-    }
-
-    .table {
-      color: #e0e0e0;
-    }
-
-    .table-hover tbody tr:hover {
-      color: #fff;
-      background-color: #2d2d2d;
-    }
-
-    a {
-      color: #03dac6;
-      text-decoration: none;
-    }
-
-    a:hover {
-      color: #fff;
-    }
-
-    .breadcrumb-item.active {
-      color: #888;
-    }
-  </style>
 </head>
 
 <body class="d-flex flex-column h-100">
@@ -65,20 +32,39 @@ AppAsset::register($this);
     NavBar::begin([
       'brandLabel' => 'LifeHacks Admin',
       'brandUrl' => ['/admin/default/index'],
-      'options' => ['class' => 'navbar navbar-expand-md navbar-dark bg-dark border-bottom border-secondary fixed-top'],
+      // Використовуємо navbar-dark bg-dark для темної теми
+      'options' => ['class' => 'navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary fixed-top shadow'],
     ]);
 
     echo Nav::widget([
       'options' => ['class' => 'navbar-nav ms-auto'],
       'items' => [
-        ['label' => 'Dashboard', 'url' => ['/admin/default/index']],
-        ['label' => 'Users', 'url' => ['/admin/user/index']],
-        ['label' => 'Topics', 'url' => ['/admin/topic/index']],
-        ['label' => 'Articles', 'url' => ['/admin/article/index']],
-        ['label' => 'Comments', 'url' => ['/admin/comment/index']], // <--- NEW
-        ['label' => 'Votes', 'url' => ['/admin/vote/index']],       // <--- NEW
-        ['label' => 'Back to Site', 'url' => ['/site/index'], 'linkOptions' => ['target' => '_blank']],
-        ['label' => 'Logout', 'url' => ['/auth/logout'], 'linkOptions' => ['data-method' => 'post', 'class' => 'text-danger']],
+        ['label' => 'Dashboard', 'url' => ['/admin/default/index'], 'encode' => false],
+        ['label' => 'Users', 'url' => ['/admin/user/index'], 'encode' => false],
+        ['label' => 'Topics', 'url' => ['/admin/topic/index'], 'encode' => false],
+        ['label' => 'Articles', 'url' => ['/admin/article/index'], 'encode' => false],
+        ['label' => 'Comments', 'url' => ['/admin/comment/index'], 'encode' => false],
+        ['label' => 'Votes', 'url' => ['/admin/vote/index'], 'encode' => false],
+
+        [
+          'label' => 'Back to Site',
+          'url' => ['/site/index'],
+          'encode' => false,
+          'linkOptions' => [
+            'target' => '_blank',
+            'class' => 'fw-bold', // Можна прибрати text-info, якщо ми все одно задаємо колір вручну
+            'style' => 'color: #ffca28 !important; font-weight: bold;' // <--- ТЕПЕР ТУТ
+          ],
+        ],
+        [
+          'label' => 'Logout',
+          'url' => ['/auth/logout'],
+          'encode' => false,
+          'linkOptions' => [
+            'data-method' => 'post',
+            'style' => 'color: #cf6679 !important;' // <--- ТЕПЕР ТУТ
+          ],
+        ],
       ],
     ]);
     NavBar::end();
@@ -88,12 +74,21 @@ AppAsset::register($this);
   <main role="main" class="flex-shrink-0" style="padding-top: 80px;">
     <div class="container">
       <?= Breadcrumbs::widget([
-        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         'homeLink' => ['label' => 'Admin', 'url' => ['/admin/default/index']],
+        'options' => ['class' => 'breadcrumb bg-transparent p-0 mb-4'],
+        'itemTemplate' => "<li class=\"breadcrumb-item\">{link}</li>\n",
+        'activeItemTemplate' => "<li class=\"breadcrumb-item active\" aria-current=\"page\">{link}</li>\n",
       ]) ?>
+
       <?= $content ?>
     </div>
   </main>
+
+  <footer class="footer mt-auto py-3 bg-dark border-top border-secondary text-center text-muted small">
+    <div class="container">
+      &copy; LifeHacks Admin Panel <?= date('Y') ?>
+    </div>
+  </footer>
 
   <?php $this->endBody() ?>
 </body>

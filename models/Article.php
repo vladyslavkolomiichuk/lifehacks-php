@@ -120,4 +120,15 @@ class Article extends \yii\db\ActiveRecord
             ->where(['user_id' => Yii::$app->user->id, 'article_id' => $this->id])
             ->exists();
     }
+
+    public function getThumb()
+    {
+        $path = Yii::getAlias('@webroot/uploads/') . $this->image;
+
+        if ($this->image && file_exists($path)) {
+            return '/uploads/' . $this->image;
+        }
+
+        return '/uploads/no-image.png';
+    }
 }

@@ -7,45 +7,71 @@ $this->title = 'Votes Manager';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="vote-index">
-  <h1><?= Html::encode($this->title) ?></h1>
 
-  <?= GridView::widget([
-    'dataProvider' => $dataProvider,
-    'filterModel' => $searchModel,
-    'tableOptions' => ['class' => 'table table-hover table-dark'], // Темна таблиця
-    'columns' => [
-      // Явне задання колонки ID з фіксованою шириною
-      [
-        'attribute' => 'id',
-        'headerOptions' => ['style' => 'width:80px;'],
-      ],
+  <h1 class="text-white mb-4"><?= Html::encode($this->title) ?></h1>
 
-      // Виводимо ім'я користувача замість user_id
-      [
-        'attribute' => 'user_id',
-        'value' => 'user.name',
-        'label' => 'User Name'
-      ],
+  <div class="card bg-dark border-secondary shadow-sm">
+    <div class="card-body p-0">
+      <?= GridView::widget([
+        'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
+        'layout' => "{summary}\n<div class='table-responsive'>{items}</div>\n{pager}",
+        // Використовуємо наші класи для стилів
+        'tableOptions' => ['class' => 'table table-hover table-striped mb-0'],
+        'columns' => [
+          // ID по центру
+          [
+            'attribute' => 'id',
+            'headerOptions' => ['style' => 'width:60px; text-align:center;'],
+            'contentOptions' => ['style' => 'text-align:center; color: #777;'],
+          ],
 
-      // Виводимо назву статті замість article_id
-      [
-        'attribute' => 'article_id',
-        'value' => 'article.title',
-        'label' => 'Article Title'
-      ],
+          // Користувач
+          [
+            'attribute' => 'user_id',
+            'value' => 'user.name',
+            'label' => 'USER NAME',
+            'headerOptions' => ['style' => 'width: 25%;'],
+          ],
 
-      [
-        'class' => 'yii\grid\ActionColumn',
-        'template' => '{view} {delete}', // Додали view
-        'buttons' => [
-          'view' => function ($url, $model) {
-            return Html::a('<i class="bi bi-eye-fill"></i>', $url, ['class' => 'btn btn-sm btn-info']);
-          },
-          'delete' => function ($url, $model) {
-            return Html::a('<i class="bi bi-trash-fill"></i>', $url, ['class' => 'btn btn-sm btn-danger', 'data' => ['confirm' => 'Delete?', 'method' => 'post']]);
-          },
+          // Стаття
+          [
+            'attribute' => 'article_id',
+            'value' => 'article.title',
+            'label' => 'ARTICLE TITLE',
+          ],
+
+          // Колонка дій (тільки Перегляд та Видалення)
+          [
+            'class' => 'yii\grid\ActionColumn',
+            'header' => 'ACTIONS',
+            'template' => '{view} {delete}',
+            'contentOptions' => ['class' => 'action-column'],
+            'buttons' => [
+              'view' => function ($url, $model) {
+                return Html::a('<i class="bi bi-eye-fill"></i>', $url, [
+                  'class' => 'action-btn-custom btn-view-style',
+                  'title' => 'View',
+                ]);
+              },
+              'delete' => function ($url, $model) {
+                return Html::a('<i class="bi bi-trash-fill"></i>', $url, [
+                  'class' => 'action-btn-custom btn-delete-style',
+                  'title' => 'Delete',
+                  'data' => [
+                    'confirm' => 'Delete vote?',
+                    'method' => 'post',
+                  ],
+                ]);
+              },
+            ],
+          ],
         ],
-      ],
-    ],
-  ]); ?>
+        'pager' => [
+          'class' => \yii\bootstrap5\LinkPager::class,
+          'options' => ['class' => 'pagination justify-content-center mt-3'],
+        ],
+      ]); ?>
+    </div>
+  </div>
 </div>

@@ -7,31 +7,51 @@ use app\models\Topic;
 use app\models\User;
 ?>
 
-<div class="article-form card bg-dark border-secondary">
+<div class="article-form card bg-dark border-secondary shadow-sm">
   <div class="card-body">
-    <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
+    <?php $form = ActiveForm::begin([
+      'options' => ['enctype' => 'multipart/form-data', 'class' => 'dark-form'] // Додаємо клас dark-form
+    ]); ?>
 
-    <?= $form->field($model, 'title')->textInput(['style' => 'background:#2d2d2d; color:#fff; border:1px solid #444;']) ?>
+    <div class="row">
+      <div class="col-md-12 mb-3">
+        <?= $form->field($model, 'title')->textInput(['placeholder' => 'Enter article title...']) ?>
+      </div>
 
-    <?= $form->field($model, 'description')->textarea(['rows' => 6, 'style' => 'background:#2d2d2d; color:#fff; border:1px solid #444;']) ?>
+      <div class="col-md-12 mb-3">
+        <?= $form->field($model, 'description')->textarea(['rows' => 6, 'placeholder' => 'Article content...']) ?>
+      </div>
 
-    <?= $form->field($model, 'topic_id')->dropdownList(
-      ArrayHelper::map(Topic::find()->all(), 'id', 'name'),
-      ['style' => 'background:#2d2d2d; color:#fff; border:1px solid #444;']
-    ) ?>
+      <div class="col-md-6 mb-3">
+        <?= $form->field($model, 'topic_id')->dropDownList(
+          ArrayHelper::map(Topic::find()->all(), 'id', 'name'),
+          ['prompt' => 'Select Topic...']
+        ) ?>
+      </div>
 
-    <?= $form->field($model, 'user_id')->dropdownList(
-      ArrayHelper::map(User::find()->all(), 'id', 'name'),
-      ['style' => 'background:#2d2d2d; color:#fff; border:1px solid #444;']
-    )->label('Author') ?>
+      <div class="col-md-6 mb-3">
+        <?= $form->field($model, 'user_id')->dropDownList(
+          ArrayHelper::map(User::find()->all(), 'id', 'name'),
+          ['prompt' => 'Select Author...']
+        )->label('Author') ?>
+      </div>
 
-    <?= $form->field($model, 'image')->fileInput() ?>
+      <div class="col-md-6 mb-3">
+        <?= $form->field($model, 'image')->fileInput() ?>
+      </div>
 
-    <?= $form->field($model, 'tag')->textInput(['style' => 'background:#2d2d2d; color:#fff; border:1px solid #444;']) ?>
-
-    <div class="form-group mt-3">
-      <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+      <div class="col-md-6 mb-3">
+        <?= $form->field($model, 'tag')->textInput(['placeholder' => 'e.g. php, yii2, coding']) ?>
+      </div>
     </div>
+
+    <div class="form-group mt-4 pt-3 border-top border-secondary">
+      <?= Html::submitButton($model->isNewRecord ? '<i class="bi bi-plus-lg"></i> Create' : '<i class="bi bi-check-lg"></i> Save', [
+        'class' => 'btn btn-success fw-bold px-4'
+      ]) ?>
+      <?= Html::a('Cancel', ['index'], ['class' => 'btn btn-outline-secondary ms-2']) ?>
+    </div>
+
     <?php ActiveForm::end(); ?>
   </div>
 </div>
