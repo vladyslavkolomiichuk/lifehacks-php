@@ -7,12 +7,31 @@ use app\models\Vote;
 use app\models\VoteSearch;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 class VoteController extends Controller
 {
   public function behaviors()
   {
-    return ['verbs' => ['class' => VerbFilter::class, 'actions' => ['delete' => ['POST']]]];
+    return [
+      // 2. AccessControl
+      'access' => [
+        'class' => AccessControl::class,
+        'rules' => [
+          [
+            'allow' => true,
+            'roles' => ['@'],
+            'matchCallback' => function ($rule, $action) {
+              return Yii::$app->user->identity->isAdmin;
+            }
+          ],
+        ],
+      ],
+      'verbs' => [
+        'class' => VerbFilter::class,
+        'actions' => ['delete' => ['POST']],
+      ],
+    ];
   }
 
   public function actionIndex()

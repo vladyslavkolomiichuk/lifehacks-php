@@ -9,12 +9,26 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
+use yii\filters\AccessControl;
 
 class ArticleController extends Controller
 {
   public function behaviors()
   {
     return [
+      'access' => [
+        'class' => AccessControl::class,
+        'rules' => [
+          [
+            'allow' => true,
+            'roles' => ['@'], // Тільки авторизовані
+            'matchCallback' => function ($rule, $action) {
+              // Перевірка, чи юзер є адміном (поле isAdmin в БД)
+              return Yii::$app->user->identity->isAdmin;
+            }
+          ],
+        ],
+      ],
       'verbs' => [
         'class' => VerbFilter::class,
         'actions' => ['delete' => ['POST']],

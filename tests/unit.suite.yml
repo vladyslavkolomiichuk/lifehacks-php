@@ -6,6 +6,9 @@
 actor: UnitTester
 modules:
     enabled:
-      - Asserts
-      - Yii2:
-            part: [orm, email, fixtures]
+        - Asserts
+        - Yii2:
+            part: [orm, fixtures]
+            configFile: 'config/test.php' 
+            cleanup: false   
+            transaction: false 

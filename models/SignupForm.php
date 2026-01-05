@@ -45,7 +45,7 @@ class SignupForm extends Model
 
     $user = new User();
     $user->name = $this->name;
-    $user->login = $this->email; // Записуємо email у поле login
+    $user->email = $this->email; // Записуємо email у поле login
 
     // Зберігаємо пароль як є, бо у вашій моделі User перевірка йде через === (без хешування)
     $user->password = $this->password;

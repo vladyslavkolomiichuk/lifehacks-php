@@ -8,12 +8,26 @@ use app\models\UserSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 class UserController extends Controller
 {
   public function behaviors()
   {
     return [
+      // 2. Додаємо AccessControl
+      'access' => [
+        'class' => AccessControl::class,
+        'rules' => [
+          [
+            'allow' => true,
+            'roles' => ['@'],
+            'matchCallback' => function ($rule, $action) {
+              return Yii::$app->user->identity->isAdmin;
+            }
+          ],
+        ],
+      ],
       'verbs' => [
         'class' => VerbFilter::class,
         'actions' => ['delete' => ['POST']],

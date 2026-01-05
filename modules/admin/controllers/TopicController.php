@@ -8,12 +8,32 @@ use app\models\TopicSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\filters\AccessControl;
 
 class TopicController extends Controller
 {
   public function behaviors()
   {
-    return ['verbs' => ['class' => VerbFilter::class, 'actions' => ['delete' => ['POST']]]];
+    return [
+      // 2. Додайте контроль доступу
+      'access' => [
+        'class' => AccessControl::class,
+        'rules' => [
+          [
+            'allow' => true,
+            'roles' => ['@'], // Тільки авторизовані
+            'matchCallback' => function ($rule, $action) {
+              // Тільки Адміни
+              return Yii::$app->user->identity->isAdmin;
+            }
+          ],
+        ],
+      ],
+      'verbs' => [
+        'class' => VerbFilter::class,
+        'actions' => ['delete' => ['POST']],
+      ],
+    ];
   }
   public function actionIndex()
   {
