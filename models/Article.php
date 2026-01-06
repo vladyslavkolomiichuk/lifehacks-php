@@ -23,8 +23,6 @@ use Yii;
  */
 class Article extends \yii\db\ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -108,11 +106,10 @@ class Article extends \yii\db\ActiveRecord
     }
 
     /**
-     * Перевіряє, чи лайкнув статтю поточний користувач
+     * Checks if current user liked the article
      */
     public function isLikedByCurrentUser()
     {
-        // Якщо користувач не залогінений, він апріорі не міг лайкнути
         if (Yii::$app->user->isGuest) {
             return false;
         }

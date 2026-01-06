@@ -4,11 +4,17 @@ use app\models\User;
 use app\models\Article;
 use app\models\Topic;
 
+/**
+ * Functional tests for front-end Article features.
+ */
 class ArticleCest
 {
   private $userId;
   private $topicId;
 
+  /**
+   * Prepare test data: topic and user.
+   */
   public function _before(FunctionalTester $I)
   {
     Article::deleteAll();
@@ -27,6 +33,9 @@ class ArticleCest
     $this->userId = $user->id;
   }
 
+  /**
+   * Test 1: Index page as guest
+   */
   public function checkIndexAsGuest(FunctionalTester $I)
   {
     $article = new Article([
@@ -44,45 +53,49 @@ class ArticleCest
     $I->dontSeeLink('Create New');
   }
 
+  /**
+   * Test 2: Access control for create page
+   */
   public function checkCreateAccessControl(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=article/create');
-
     $I->see('Login');
-    // ВИПРАВЛЕННЯ: використовуємо seeInCurrentUrl замість регулярних виразів
-    // Це найбільш стабільний метод для Windows/XAMPP
     $I->seeInCurrentUrl('auth');
     $I->seeInCurrentUrl('login');
   }
 
+  /**
+   * Test 3: Create article successfully as logged-in user
+   */
   public function createArticleSuccessfully(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->userId);
     $I->amOnPage('/index-test.php?r=article/create');
 
     $I->fillField(['name' => 'Article[title]'], 'My Functional Test Article');
-    // Вибираємо категорію (topicId має бути створений у _before)
     $I->selectOption(['name' => 'Article[topic_id]'], (string)$this->topicId);
     $I->fillField(['name' => 'Article[description]'], 'This is a description content');
     $I->fillField(['name' => 'Article[tag]'], 'test, codeception');
 
-    // Клікаємо саме на кнопку з текстом "Create Article"
     $I->click('Create Article');
 
-    // 1. ПЕРЕВІРКА РЕДИРЕКТУ (згідно з вашим контролером)
+    // Verify redirect to profile/index (user's articles)
     $I->seeInCurrentUrl('profile');
     $I->seeInCurrentUrl('index');
 
-    // 2. ПЕРЕВІРКА БАЗИ ДАНИХ
-    $I->seeRecord(\app\models\Article::class, [
+    // Verify DB record
+    $I->seeRecord(Article::class, [
       'title' => 'My Functional Test Article',
       'user_id' => $this->userId
     ]);
 
-    // 3. ПЕРЕВІРКА ВІДОБРАЖЕННЯ В КАБІНЕТІ
+    // Verify article displayed
     $I->see('My Functional Test Article');
   }
 
+  /**
+   * Test 4: Search functionality
+   */
   public function searchArticle(FunctionalTester $I)
   {
     $article = new Article([

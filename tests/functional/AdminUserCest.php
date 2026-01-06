@@ -2,24 +2,29 @@
 
 use app\models\User;
 
+/**
+ * Functional tests for admin User management.
+ */
 class AdminUserCest
 {
   private $adminId;
   private $regularUserId;
 
+  /**
+   * Prepare test data: admin and regular user.
+   */
   public function _before(FunctionalTester $I)
   {
-    // 1. Очищення бази перед тестом
     User::deleteAll();
 
-    // 2. Створюємо Адміна (Я)
+    // Admin
     $admin = new User(['name' => 'Super Admin', 'email' => 'admin@test.com']);
     $admin->setPassword('123');
     $admin->isAdmin = 1;
     $admin->save(false);
     $this->adminId = $admin->id;
 
-    // 3. Створюємо іншого користувача (Жертва)
+    // Regular user
     $user = new User(['name' => 'Simple User', 'email' => 'user@test.com']);
     $user->setPassword('123');
     $user->isAdmin = 0;
@@ -27,35 +32,41 @@ class AdminUserCest
     $this->regularUserId = $user->id;
   }
 
-  // ТЕСТ 1: Перевірка безпеки
+  /**
+   * Test 1: Access control - guest and non-admin user cannot access admin User pages.
+   */
   public function checkAccessControl(FunctionalTester $I)
   {
-    // Гість
+    // Guest
     $I->amOnPage('/index-test.php?r=admin/user/index');
     $I->see('Login');
 
-    // Звичайний юзер
+    // Regular user
     $I->amLoggedInAs($this->regularUserId);
     $I->amOnPage('/index-test.php?r=admin/user/index');
     $I->seeResponseCodeIs(403);
   }
 
-  // ТЕСТ 2: Список користувачів
+  /**
+   * Test 2: Index page displays users.
+   */
   public function checkIndexPage(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
     $I->amOnPage('/index-test.php?r=admin/user/index');
 
-    $I->see('Users', 'h1'); // Адаптовано під стандартний заголовок Gii
+    $I->see('Users', 'h1');
     $I->see('Super Admin');
     $I->see('Simple User');
 
-    // Перевіряємо статуси/ролі (якщо у вас вони виводяться текстом)
+    // Optional: check roles displayed
     $I->see('Admin');
     $I->see('User');
   }
 
-  // ТЕСТ 3: Редагування (Зміна ролі та імені)
+  /**
+   * Test 3: Update regular user (change name and role).
+   */
   public function updateUser(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
@@ -68,19 +79,19 @@ class AdminUserCest
 
     $I->click('button[type=submit]');
 
-    // ПЕРЕВІРКА: замість URL перевіряємо контент сторінки списку
     $I->see('Users', 'h1');
     $I->see('Promoted User');
 
     $I->seeRecord(User::class, ['id' => $this->regularUserId, 'isAdmin' => 1]);
   }
 
-  // ТЕСТ 4: Видалення іншого користувача
+  /**
+   * Test 4: Delete another user.
+   */
   public function deleteOtherUser(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
 
-    // Видаляємо через AJAX POST (найбільш надійно для GridView кнопок)
     $I->sendAjaxPostRequest('/index-test.php?r=admin/user/delete&id=' . $this->regularUserId);
 
     $I->amOnPage('/index-test.php?r=admin/user/index');
@@ -88,15 +99,16 @@ class AdminUserCest
     $I->dontSeeRecord(User::class, ['id' => $this->regularUserId]);
   }
 
-  // ТЕСТ 5: Спроба самовидалення
+  /**
+   * Test 5: Attempt self-deletion should fail.
+   */
   public function trySelfDelete(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
     $I->sendAjaxPostRequest('/index-test.php?r=admin/user/delete&id=' . $this->adminId);
-    $I->amOnPage('/index-test.php?r=admin/user/index');
 
-    // Просто перевіряємо, що запис нікуди не зник
+    $I->amOnPage('/index-test.php?r=admin/user/index');
     $I->seeRecord(User::class, ['id' => $this->adminId]);
-    $I->see('Super Admin'); // Бачимо себе в списку
+    $I->see('Super Admin');
   }
 }

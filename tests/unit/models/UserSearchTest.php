@@ -16,17 +16,17 @@ class UserSearchTest extends \Codeception\Test\Unit
   protected function _before()
   {
     $db = \Yii::$app->db;
-    // Вимикаємо перевірку ключів
+    // Disable foreign key checks
     $db->createCommand('SET FOREIGN_KEY_CHECKS = 0')->execute();
 
-    // Очищаємо основні таблиці
+    // Truncate main tables
     $db->createCommand()->truncateTable('vote')->execute();
     $db->createCommand()->truncateTable('comment')->execute();
     $db->createCommand()->truncateTable('article')->execute();
     $db->createCommand()->truncateTable('user')->execute();
     $db->createCommand()->truncateTable('topic')->execute();
 
-    // Вмикаємо назад
+    // Re-enable foreign key checks
     $db->createCommand('SET FOREIGN_KEY_CHECKS = 1')->execute();
   }
 
@@ -37,10 +37,10 @@ class UserSearchTest extends \Codeception\Test\Unit
     $user->save(false);
 
     $searchModel = new UserSearch();
-    // Використовуйте повне ім'я класу в масиві, або перевірте як працює load()
+    // Use full class name in params or check how load() works
     $params = ['UserSearch' => ['name' => 'RegularUser']];
     $dataProvider = $searchModel->search($params);
 
-    $this->assertEquals(1, $dataProvider->getTotalCount(), 'Має знайти користувача RegularUser');
+    $this->assertEquals(1, $dataProvider->getTotalCount(), 'Should find RegularUser');
   }
 }

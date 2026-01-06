@@ -6,6 +6,9 @@ use app\models\Article;
 use app\models\Topic;
 use app\models\User;
 
+/**
+ * Unit tests for Article model.
+ */
 class ArticleTest extends \Codeception\Test\Unit
 {
   /**
@@ -13,18 +16,24 @@ class ArticleTest extends \Codeception\Test\Unit
    */
   protected $tester;
 
+  /**
+   * Cleans tables before each test to avoid conflicts.
+   */
   protected function _before()
   {
-    // Очищаємо таблиці перед тестом
     Article::deleteAll();
     Topic::deleteAll();
     User::deleteAll();
   }
 
+  /**
+   * Test validation rules of Article model.
+   */
   public function testValidation()
   {
-    // 1. ПІДГОТОВКА: Створюємо реальні записи в БД для правил 'exist'
-    $user = new User(['name' => 'Tester', 'email' => 'test@test.com', 'password' => '123456']);
+    // 1. Create real User and Topic for 'exist' rules
+    $user = new User(['name' => 'Tester', 'email' => 'test@test.com']);
+    $user->setPassword('123456');
     $user->save(false);
 
     $topic = new Topic(['name' => 'Test Topic']);
@@ -32,53 +41,55 @@ class ArticleTest extends \Codeception\Test\Unit
 
     $article = new Article();
 
-    // Сценарій 1: Валідні дані
+    // Scenario 1: Valid data
     $article->title = 'Test Title';
     $article->description = 'Some long text description';
     $article->date = date('Y-m-d');
-    $article->user_id = $user->id;   // Використовуємо реальний ID
-    $article->topic_id = $topic->id; // Використовуємо реальний ID
+    $article->user_id = $user->id;
+    $article->topic_id = $topic->id;
+    $this->assertTrue($article->validate(), 'Article should be valid with correct data');
 
-    $this->assertTrue($article->validate(), 'Model should be valid with real user/topic IDs');
-
-    // Сценарій 2: Неіснуючий user_id (має бути помилка через правило 'exist')
+    // Scenario 2: Non-existing user_id
     $article->user_id = 9999;
-    $this->assertFalse($article->validate(['user_id']), 'Should be invalid if user does not exist');
+    $this->assertFalse($article->validate(['user_id']), 'Validation should fail if user_id does not exist');
 
-    // Сценарій 3: Занадто довгий заголовок
-    $article->user_id = $user->id; // повертаємо валідний ID
+    // Scenario 3: Title too long
+    $article->user_id = $user->id; // restore valid user_id
     $article->title = str_repeat('a', 256);
-    $this->assertFalse($article->validate(['title']), 'Title max 255 chars');
+    $this->assertFalse($article->validate(['title']), 'Validation should fail for title > 255 chars');
   }
 
+  /**
+   * Test saving the model and checking relations.
+   */
   public function testSavingAndRelations()
   {
-    // 1. Створюємо допоміжні дані (User + Topic)
-    $user = new User(['name' => 'Author', 'email' => 'author@test.com', 'password' => '123']);
+    $user = new User(['name' => 'Author', 'email' => 'author@test.com']);
+    $user->setPassword('123');
     $user->save(false);
 
     $topic = new Topic(['name' => 'Tech']);
     $topic->save(false);
 
-    // 2. Створюємо статтю
     $article = new Article();
     $article->title = 'My Article';
     $article->user_id = $user->id;
     $article->topic_id = $topic->id;
     $article->date = date('Y-m-d');
 
-    $this->assertTrue($article->save(), 'Article should be saved');
-
-    // 3. Перевіряємо, чи зберігся ID
-    $this->assertNotNull($article->id);
+    $this->assertTrue($article->save(), 'Article should save successfully');
+    $this->assertNotNull($article->id, 'Article ID should be generated');
   }
 
+  /**
+   * Test getImage() returns a string (placeholder or path).
+   */
   public function testGetThumb()
   {
     $article = new Article();
     $thumb = $article->getImage();
-    $this->assertNotEmpty($thumb);
-    // Перевіряємо, чи повертається хоча б рядок (плейсхолдер або шлях)
-    $this->assertIsString($thumb);
+
+    $this->assertNotEmpty($thumb, 'getImage() should return a non-empty value');
+    $this->assertIsString($thumb, 'getImage() should return a string');
   }
 }

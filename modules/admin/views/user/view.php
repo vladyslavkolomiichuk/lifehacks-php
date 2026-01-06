@@ -28,7 +28,6 @@ $this->title = $model->name;
         'model' => $model,
         'attributes' => [
           'id',
-          // Фотографія з гарним оформленням
           [
             'attribute' => 'image',
             'label' => 'Photo',
@@ -42,7 +41,6 @@ $this->title = $model->name;
           ],
           'name',
           'email:email',
-          // Бейджі статусів у ваших кольорах
           [
             'attribute' => 'isAdmin',
             'format' => 'raw',
@@ -51,7 +49,6 @@ $this->title = $model->name;
               : '<span class="badge" style="background-color: #444; color: #ccc;">User</span>',
           ],
         ],
-        // Використовуємо table-dark та клас detail-view
         'options' => ['class' => 'table table-dark table-bordered detail-view mb-0'],
       ]) ?>
     </div>

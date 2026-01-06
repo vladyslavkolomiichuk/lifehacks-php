@@ -2,15 +2,20 @@
 
 use app\models\User;
 
+/**
+ * Functional tests for login page and authentication.
+ */
 class LoginCest
 {
-  // Метод виконується перед кожним тестом
+  /**
+   * Runs before each test. Creates a fresh test user.
+   */
   public function _before(FunctionalTester $I)
   {
-    // 1. Повне очищення для ізоляції тесту
+    // Clean up users for isolation
     User::deleteAll();
 
-    // 2. Створюємо тестового користувача
+    // Create a test user
     $user = new User();
     $user->name = 'Test User';
     $user->email = 'test@example.com';
@@ -19,40 +24,45 @@ class LoginCest
     $user->save(false);
   }
 
-  // ТЕСТ 1: Перевірка відкриття сторінки
+  /**
+   * Test 1: Open login page
+   */
   public function openLoginPage(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=auth/login');
 
-    // Перевіряємо текст, який специфічний саме для форми, а не для меню
+    // Verify the login page header
     $I->see('Please fill out the following fields to login:');
 
-    // Перевіряємо наявність форми та полів за точними селекторами
+    // Verify presence of form and input fields
     $I->seeElement('#login-form');
     $I->seeElement('input', ['name' => 'LoginForm[email]']);
     $I->seeElement('input', ['name' => 'LoginForm[password]']);
   }
 
-  // ТЕСТ 2: Вхід з неправильним паролем
+  /**
+   * Test 2: Attempt login with incorrect password
+   */
   public function loginWithWrongPassword(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=auth/login');
 
-    // Використовуємо надійний метод заповнення через масив атрибутів
     $I->fillField(['name' => 'LoginForm[email]'], 'test@example.com');
     $I->fillField(['name' => 'LoginForm[password]'], 'wrong_pass');
 
-    // Клікаємо на кнопку за її іменем з view
+    // Click the login button
     $I->click('login-button');
 
-    // Перевіряємо валідаційне повідомлення (має збігатися з моделлю LoginForm)
+    // Verify validation error
     $I->see('Incorrect email or password.');
 
-    // Перевіряємо, що користувач залишився на сторінці логіну
+    // Ensure still on login page
     $I->seeElement('#login-form');
   }
 
-  // ТЕСТ 3: Успішний вхід
+  /**
+   * Test 3: Successful login
+   */
   public function loginSuccessfully(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=auth/login');
@@ -62,10 +72,10 @@ class LoginCest
 
     $I->click('login-button');
 
-    // Після успішного входу Yii редиректить на головну, де в меню має бути Logout
+    // Verify redirect and that Logout is visible
     $I->see('Logout');
 
-    // Додаткова перевірка: форма логіну має зникнути
+    // Verify the login form is gone
     $I->dontSeeElement('#login-form');
   }
 }

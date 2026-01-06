@@ -20,8 +20,6 @@ class SiteController extends Controller
         ];
     }
 
-    // Якщо хочете, щоб головна сторінка сайту "/" відкривала стрічку новин,
-    // можна зробити редірект або відрендерити actionIndex з ArticleController
     public function actionIndex()
     {
         return $this->redirect(['article/index']);

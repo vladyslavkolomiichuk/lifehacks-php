@@ -16,41 +16,41 @@ class VoteTest extends \Codeception\Test\Unit
 
   protected function _before()
   {
-    // Очищаємо всі таблиці перед тестом
+    // Clear all tables before test
     Vote::deleteAll();
     Article::deleteAll();
     Topic::deleteAll();
     User::deleteAll();
   }
 
-  // ТЕСТ 1: Валідація (чи обов'язкові поля)
+  // TEST 1: Validation (required fields)
   public function testValidation()
   {
     $vote = new Vote();
 
-    // Сценарій 1: Порожня модель
+    // Scenario 1: Empty model
     $this->assertFalse($vote->validate(), 'Vote should not be valid without user_id and article_id');
     $this->assertArrayHasKey('user_id', $vote->errors);
     $this->assertArrayHasKey('article_id', $vote->errors);
 
-    // Сценарій 2: Неправильні типи даних (мають бути integer)
+    // Scenario 2: Wrong data types (must be integer)
     $vote->user_id = 'not-a-number';
     $vote->article_id = 'string';
     $this->assertFalse($vote->validate(), 'IDs must be integers');
   }
 
-  // ТЕСТ 2: Збереження та Зв'язки
+  // TEST 2: Save and relations
   public function testSavingAndRelations()
   {
-    // 1. Створюємо "Автора" статті
+    // 1. Create article author
     $author = new User(['name' => 'Author', 'email' => 'author@test.com', 'password' => '123']);
     $author->save(false);
 
-    // 2. Створюємо "Вортера" (той, хто лайкає)
+    // 2. Create voter
     $voter = new User(['name' => 'Voter', 'email' => 'voter@test.com', 'password' => '123']);
     $voter->save(false);
 
-    // 3. Створюємо Тему і Статтю
+    // 3. Create topic and article
     $topic = new Topic(['name' => 'Tech']);
     $topic->save(false);
 
@@ -61,21 +61,19 @@ class VoteTest extends \Codeception\Test\Unit
     ]);
     $article->save(false);
 
-    // 4. Створюємо ЛАЙК (Vote)
+    // 4. Create vote
     $vote = new Vote();
     $vote->user_id = $voter->id;
     $vote->article_id = $article->id;
 
-    // Перевіряємо збереження
+    // Check save
     $this->assertTrue($vote->save(), 'Vote should be saved successfully');
 
-    // 5. Перевіряємо зв'язки
-    // Чи можемо отримати статтю?
-    $this->assertNotNull($vote->article, 'Should perform hasOne relation to Article');
+    // 5. Check relations
+    $this->assertNotNull($vote->article, 'HasOne relation to Article');
     $this->assertEquals($article->title, $vote->article->title);
 
-    // Чи можемо отримати юзера (того, хто лайкнув)?
-    $this->assertNotNull($vote->user, 'Should perform hasOne relation to User');
+    $this->assertNotNull($vote->user, 'HasOne relation to User');
     $this->assertEquals($voter->email, $vote->user->email);
   }
 }

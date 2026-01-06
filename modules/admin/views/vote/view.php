@@ -36,7 +36,6 @@ $this->title = 'Vote #' . $model->id;
             'attribute' => 'article_id',
             'label' => 'Article',
             'format' => 'raw',
-            // Посилання на перегляд статті
             'value' => Html::a(
               $model->article->title,
               ['/admin/article/view', 'id' => $model->article_id],
@@ -44,7 +43,6 @@ $this->title = 'Vote #' . $model->id;
             ),
           ],
         ],
-        // Використовуємо table-dark та наш клас detail-view
         'options' => ['class' => 'table table-dark table-bordered detail-view mb-0'],
       ]) ?>
     </div>

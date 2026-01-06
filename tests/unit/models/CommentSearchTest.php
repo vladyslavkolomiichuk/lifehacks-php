@@ -9,11 +9,19 @@ use app\models\User;
 use app\models\Topic;
 use Yii;
 
+/**
+ * Unit test for CommentSearch model.
+ */
 class CommentSearchTest extends \Codeception\Test\Unit
 {
+  /**
+   * @var \UnitTester
+   */
   protected $tester;
 
-  // Глибока очистка бази через SQL
+  /**
+   * Clear database before each test.
+   */
   protected function _before()
   {
     $db = Yii::$app->db;
@@ -27,35 +35,59 @@ class CommentSearchTest extends \Codeception\Test\Unit
     $db->createCommand('SET FOREIGN_KEY_CHECKS = 1')->execute();
   }
 
+  /**
+   * Test searching comments by user_id and text.
+   */
   public function testSearch()
   {
-    // Створюємо ОДНОГО юзера для Alice
-    $userAlice = new User(['name' => 'Alice Unique', 'email' => 'alice_unique@test.com']);
-    $userAlice->password = '123456';
+    // 1. Create user
+    $userAlice = new User([
+      'name' => 'Alice Unique',
+      'email' => 'alice_unique@test.com',
+      'password' => '123456'
+    ]);
     $userAlice->save(false);
 
+    // 2. Create topic
     $topic = new Topic(['name' => 'General']);
     $topic->save(false);
 
-    $article = new Article(['title' => 'Post', 'user_id' => $userAlice->id, 'topic_id' => $topic->id, 'date' => date('Y-m-d')]);
+    // 3. Create article
+    $article = new Article([
+      'title' => 'Post',
+      'user_id' => $userAlice->id,
+      'topic_id' => $topic->id,
+      'date' => date('Y-m-d')
+    ]);
     $article->save(false);
 
-    // Створюємо 2 коментарі саме від Alice з унікальним префіксом
-    $c1 = new Comment(['text' => 'SEARCH_ME_1', 'user_id' => $userAlice->id, 'article_id' => $article->id]);
+    // 4. Create comments
+    $c1 = new Comment([
+      'text' => 'SEARCH_ME_1',
+      'user_id' => $userAlice->id,
+      'article_id' => $article->id,
+      'date' => date('Y-m-d H:i:s')
+    ]);
     $c1->save(false);
-    $c2 = new Comment(['text' => 'SEARCH_ME_2', 'user_id' => $userAlice->id, 'article_id' => $article->id]);
+
+    $c2 = new Comment([
+      'text' => 'SEARCH_ME_2',
+      'user_id' => $userAlice->id,
+      'article_id' => $article->id,
+      'date' => date('Y-m-d H:i:s')
+    ]);
     $c2->save(false);
 
     $searchModel = new CommentSearch();
 
-    // Пошук за точною ID користувача Alice
+    // 5. Search by user_id
     $params = ['CommentSearch' => ['user_id' => $userAlice->id]];
     $dataProvider = $searchModel->search($params);
-    $this->assertEquals(2, $dataProvider->getTotalCount(), 'Має знайти 2 коментарі за ID Alice');
+    $this->assertEquals(2, $dataProvider->getTotalCount(), 'Should find 2 comments by user ID');
 
-    // Пошук за унікальною строкою
+    // 6. Search by text containing SEARCH_ME
     $params = ['CommentSearch' => ['text' => 'SEARCH_ME']];
     $dataProvider = $searchModel->search($params);
-    $this->assertEquals(2, $dataProvider->getTotalCount(), 'Має знайти 2 коментарі за словом SEARCH_ME');
+    $this->assertEquals(2, $dataProvider->getTotalCount(), 'Should find 2 comments containing SEARCH_ME');
   }
 }

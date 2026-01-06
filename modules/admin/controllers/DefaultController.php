@@ -10,8 +10,14 @@ use app\models\Comment;
 use app\models\Topic;
 use yii\filters\AccessControl;
 
+/**
+ * Admin default controller (dashboard).
+ */
 class DefaultController extends Controller
 {
+  /**
+   * Access control for admin users.
+   */
   public function behaviors()
   {
     return [
@@ -20,16 +26,19 @@ class DefaultController extends Controller
         'rules' => [
           [
             'allow' => true,
-            'roles' => ['@'],
+            'roles' => ['@'], // Only authenticated users
             'matchCallback' => function ($rule, $action) {
-              return Yii::$app->user->identity->isAdmin;
-            }
+              return Yii::$app->user->identity->isAdmin; // Only admins
+            },
           ],
         ],
       ],
     ];
   }
 
+  /**
+   * Displays the admin dashboard with statistics.
+   */
   public function actionIndex()
   {
     return $this->render('index', [

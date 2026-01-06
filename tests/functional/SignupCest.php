@@ -2,29 +2,39 @@
 
 use app\models\User;
 
+/**
+ * Functional tests for user signup.
+ */
 class SignupCest
 {
+  /**
+   * Runs before each test: clean the user table.
+   */
   public function _before(FunctionalTester $I)
   {
-    // Очищаємо базу перед тестом
     User::deleteAll();
   }
 
+  /**
+   * Test 1: Open the signup page and check the form fields.
+   */
   public function openSignupPage(FunctionalTester $I)
   {
-    // ВИПРАВЛЕНО: передаємо рядок замість масиву
     $I->amOnPage('/index-test.php?r=auth/signup');
+
     $I->see('Signup', 'h3');
     $I->seeElement('input', ['name' => 'SignupForm[name]']);
     $I->seeElement('input', ['name' => 'SignupForm[email]']);
     $I->seeElement('input', ['name' => 'SignupForm[password]']);
   }
 
+  /**
+   * Test 2: Submit the signup form with empty fields to trigger validation errors.
+   */
   public function signupWithEmptyFields(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=auth/signup');
 
-    // Клікаємо саме по кнопці форми
     $I->click('button[type=submit]');
 
     $I->expect('validation errors are displayed');
@@ -33,6 +43,9 @@ class SignupCest
     $I->see('Password cannot be blank');
   }
 
+  /**
+   * Test 3: Successfully sign up a new user.
+   */
   public function signupSuccessfully(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=auth/signup');
@@ -43,15 +56,15 @@ class SignupCest
 
     $I->click('button[type=submit]');
 
-    // ВАРІАНТ 1: Перевіряємо частинами (найбільш стабільно)
+    // Verify redirection to login page
     $I->seeInCurrentUrl('auth');
     $I->seeInCurrentUrl('login');
 
-    // ВАРІАНТ 2: Або перевіряємо текст на сторінці логіна
+    // Verify login form is visible
     $I->see('Please fill out the following fields to login:');
 
-    // ВАРІАНТ 3: Перевірка бази даних (найважливіше!)
-    $I->seeRecord('app\models\User', [
+    // Verify the user is saved in the database
+    $I->seeRecord(User::class, [
       'email' => 'newuser@test.com',
       'name' => 'Test User'
     ]);

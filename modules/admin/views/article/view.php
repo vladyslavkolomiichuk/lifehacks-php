@@ -57,8 +57,6 @@ $this->title = $model->title;
           'viewed',
           'upvotes',
         ],
-        // Важливо: table-dark робить таблицю темною.
-        // detail-view - наш клас для вирівнювання і кольорів заголовків
         'options' => ['class' => 'table table-dark table-bordered detail-view mb-0'],
       ]) ?>
     </div>

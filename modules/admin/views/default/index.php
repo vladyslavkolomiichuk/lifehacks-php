@@ -6,7 +6,6 @@ $this->title = 'Dashboard';
 ?>
 
 <style>
-  /* Локальні стилі для карток Dashboard */
   .stat-card {
     border: none;
     border-radius: 15px;
@@ -21,7 +20,6 @@ $this->title = 'Dashboard';
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   }
 
-  /* Градієнти для карток */
   .bg-gradient-primary {
     background: linear-gradient(45deg, #4e73df, #224abe);
   }
@@ -35,12 +33,10 @@ $this->title = 'Dashboard';
     color: #fff !important;
   }
 
-  /* Білий текст для жовтого */
   .bg-gradient-danger {
     background: linear-gradient(45deg, #e74a3b, #be2617);
   }
 
-  /* Стиль контенту */
   .stat-card-title {
     font-size: 0.8rem;
     font-weight: 700;
@@ -56,7 +52,6 @@ $this->title = 'Dashboard';
     line-height: 1.2;
   }
 
-  /* Велика іконка праворуч */
   .stat-card-icon {
     position: absolute;
     right: 15px;
@@ -64,11 +59,9 @@ $this->title = 'Dashboard';
     transform: translateY(-50%);
     font-size: 4rem;
     opacity: 0.2;
-    /* Напівпрозора */
     pointer-events: none;
   }
 
-  /* Посилання знизу */
   .stat-card-link {
     display: block;
     padding: 10px 20px;

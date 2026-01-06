@@ -2,20 +2,26 @@
 
 namespace app\models;
 
-use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\Vote;
 
+/**
+ * VoteSearch handles filtering of votes.
+ */
 class VoteSearch extends Vote
 {
+  /**
+   * Validation rules for search fields.
+   */
   public function rules()
   {
-    // Переконайтеся, що 'id' є в цьому списку
     return [
       [['id', 'user_id', 'article_id'], 'integer'],
     ];
   }
 
+  /**
+   * Builds data provider with applied search filters.
+   */
   public function search($params)
   {
     $query = Vote::find();
@@ -30,7 +36,7 @@ class VoteSearch extends Vote
       return $dataProvider;
     }
 
-    // Фільтрація по ID
+    // Exact match filters
     $query->andFilterWhere([
       'id' => $this->id,
       'user_id' => $this->user_id,

@@ -6,6 +6,9 @@ use Yii;
 use app\models\LoginForm;
 use app\models\User;
 
+/**
+ * Unit tests for LoginForm model.
+ */
 class LoginFormTest extends \Codeception\Test\Unit
 {
   /**
@@ -13,69 +16,73 @@ class LoginFormTest extends \Codeception\Test\Unit
    */
   protected $tester;
 
-  // Очищаємо базу і створюємо тестового юзера перед тестами
+  /**
+   * Set up test user before each test.
+   */
   protected function _before()
   {
+    // Clean DB
     User::deleteAll();
 
+    // Create a test user with known password
     $user = new User();
     $user->name = 'Test User';
     $user->email = 'demo@example.com';
-    // Генеруємо хеш для пароля 'demo123', щоб перевірка validatePassword пройшла успішно
     $user->password = Yii::$app->security->generatePasswordHash('demo123');
     $user->save(false);
   }
 
+  /**
+   * Clean up after each test.
+   */
   protected function _after()
   {
-    // Обов'язково виходимо з системи після тесту, щоб не впливати на інші тесты
     Yii::$app->user->logout();
   }
 
-  // ТЕСТ 1: Перевірка стандартної валідації (формат email, required)
+  /**
+   * Test basic validation rules (required, email format).
+   */
   public function testValidation()
   {
     $model = new LoginForm();
 
-    // Сценарій 1: Порожні поля
+    // Empty fields
     $model->email = null;
     $model->password = null;
-    $this->assertFalse($model->validate(), 'Should fail with empty fields');
+    $this->assertFalse($model->validate());
     $this->assertArrayHasKey('email', $model->errors);
     $this->assertArrayHasKey('password', $model->errors);
 
-    // Сценарій 2: Некоректний формат Email
-    $model->email = 'not-an-email';
+    // Invalid email format
+    $model->email = 'invalid-email';
     $model->password = 'demo123';
-    $this->assertFalse($model->validate(['email']), 'Should fail with invalid email format');
+    $this->assertFalse($model->validate(['email']));
   }
 
-  // ТЕСТ 2: Спроба входу з неправильним паролем
+  /**
+   * Test login with wrong password.
+   */
   public function testLoginWrongPassword()
   {
     $model = new LoginForm([
       'email' => 'demo@example.com',
-      'password' => 'wrong-password', // Невірний пароль
+      'password' => 'wrong-password',
     ]);
 
-    // Валідація має пройти (формат правильний), але login() має повернути false
-    // АБО validate() поверне false через validatePassword (залежить від реалізації Yii validator)
-
-    $this->assertFalse($model->login(), 'Admin should not be logged in with wrong password');
-
-    // Перевіряємо, чи з'явилася помилка саме на полі password
+    $this->assertFalse($model->login(), 'Should not login with wrong password');
     $this->assertArrayHasKey('password', $model->errors);
     $this->assertStringContainsString('Incorrect email or password', $model->errors['password'][0]);
-
-    // Переконуємось, що система все ще вважає нас гостем
     $this->assertTrue(Yii::$app->user->isGuest);
   }
 
-  // ТЕСТ 3: Спроба входу з неіснуючим email
+  /**
+   * Test login with non-existent email.
+   */
   public function testLoginNonExistentUser()
   {
     $model = new LoginForm([
-      'email' => 'nobody@example.com', // Такого юзера немає
+      'email' => 'nobody@example.com',
       'password' => 'demo123',
     ]);
 
@@ -83,21 +90,19 @@ class LoginFormTest extends \Codeception\Test\Unit
     $this->assertTrue(Yii::$app->user->isGuest);
   }
 
-  // ТЕСТ 4: Успішний вхід
+  /**
+   * Test successful login.
+   */
   public function testLoginCorrect()
   {
     $model = new LoginForm([
       'email' => 'demo@example.com',
-      'password' => 'demo123', // Вірний пароль
+      'password' => 'demo123',
     ]);
 
-    $this->assertTrue($model->login(), 'User should be logged in successfully');
-
-    // Перевіряємо помилки (їх не має бути)
-    $this->assertEmpty($model->errors, 'Should be no validation errors');
-
-    // Перевіряємо статус Yii::$app->user
-    $this->assertFalse(Yii::$app->user->isGuest, 'User should not be a guest anymore');
+    $this->assertTrue($model->login(), 'User should login successfully');
+    $this->assertEmpty($model->errors);
+    $this->assertFalse(Yii::$app->user->isGuest);
     $this->assertEquals('demo@example.com', Yii::$app->user->identity->email);
   }
 }

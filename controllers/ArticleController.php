@@ -22,21 +22,20 @@ class ArticleController extends Controller
     return [
       'access' => [
         'class' => AccessControl::class,
-        'only' => ['create', 'update', 'delete', 'like'], // Дії, що потребують авторизації
+        'only' => ['create', 'update', 'delete', 'like'],
         'rules' => [
           [
             'actions' => ['create', 'update', 'delete', 'like'],
             'allow' => true,
             'roles' => ['@'],
           ],
-          // index, view, topic, search - доступні всім (за замовчуванням)
         ],
       ],
     ];
   }
 
   /**
-   * Головна стрічка статей (раніше було в SiteController::actionIndex)
+   * Main articles feed (previously in SiteController::actionIndex)
    */
   public function actionIndex()
   {
@@ -49,7 +48,7 @@ class ArticleController extends Controller
       ->limit($pagination->limit)
       ->all();
 
-    return $this->render('index', [ // переконайтесь, що файл view/article/index.php існує
+    return $this->render('index', [
       'articles' => $articles,
       'pagination' => $pagination,
       'popular' => $this->getPopular(),
@@ -59,7 +58,7 @@ class ArticleController extends Controller
   }
 
   /**
-   * Перегляд однієї статті
+   * Single article view
    */
   public function actionView($id)
   {
@@ -68,7 +67,7 @@ class ArticleController extends Controller
       throw new NotFoundHttpException("Article not found.");
     }
 
-    // Лічильник переглядів + Cookie
+    // View counter + Cookie
     $cookieName = 'viewed_article_' . $id;
     if (!Yii::$app->request->cookies->has($cookieName)) {
       $article->updateCounters(['viewed' => 1]);
@@ -82,7 +81,7 @@ class ArticleController extends Controller
     $comments = $article->getComments()->all();
     $commentForm = new CommentForm();
 
-    return $this->render('view', [ // переконайтесь, що view/article/view.php існує (раніше single.php)
+    return $this->render('view', [
       'article' => $article,
       'comments' => $comments,
       'commentForm' => $commentForm,
@@ -92,7 +91,7 @@ class ArticleController extends Controller
   }
 
   /**
-   * Створення статті
+   * Create article
    */
   public function actionCreate()
   {
@@ -123,7 +122,7 @@ class ArticleController extends Controller
   }
 
   /**
-   * Редагування статті
+   * Update article
    */
   public function actionUpdate($id)
   {
@@ -158,7 +157,7 @@ class ArticleController extends Controller
   }
 
   /**
-   * Видалення статті
+   * Delete article
    */
   public function actionDelete($id)
   {
@@ -173,7 +172,7 @@ class ArticleController extends Controller
   }
 
   /**
-   * Категорії
+   * Categories
    */
   public function actionTopic($id)
   {
@@ -203,8 +202,6 @@ class ArticleController extends Controller
   {
     $query = Article::find();
 
-    // Логіка пошуку: (Title схожий на Q) АБО (Tag схожий на Q)
-    // Ми прибрали description, щоб шукати тільки по заголовку і тегам, як ви просили
     $query->where(['like', 'title', $q])
       ->orWhere(['like', 'tag', $q]);
 
@@ -217,7 +214,6 @@ class ArticleController extends Controller
       ->limit($pagination->limit)
       ->all();
 
-    // Дані для сайдбару
     $popular = Article::find()->orderBy('viewed DESC')->limit(3)->all();
     $topics = \app\models\Topic::find()->all();
 
@@ -231,7 +227,7 @@ class ArticleController extends Controller
   }
 
   /**
-   * Лайки
+   * Likes
    */
   public function actionLike($id)
   {
@@ -254,7 +250,7 @@ class ArticleController extends Controller
     return $this->redirect(Yii::$app->request->referrer);
   }
 
-  // Допоміжні методи для сайдбару
+  // Sidebar helper methods
   protected function getPopular()
   {
     return Article::find()->orderBy(['upvotes' => SORT_DESC])->limit(3)->all();

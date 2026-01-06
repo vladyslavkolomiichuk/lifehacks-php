@@ -11,8 +11,14 @@ use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
 use yii\filters\AccessControl;
 
+/**
+ * Admin controller for managing articles.
+ */
 class ArticleController extends Controller
 {
+  /**
+   * Access control and HTTP verb filters.
+   */
   public function behaviors()
   {
     return [
@@ -21,11 +27,10 @@ class ArticleController extends Controller
         'rules' => [
           [
             'allow' => true,
-            'roles' => ['@'], // Тільки авторизовані
+            'roles' => ['@'], // Only authenticated users
             'matchCallback' => function ($rule, $action) {
-              // Перевірка, чи юзер є адміном (поле isAdmin в БД)
-              return Yii::$app->user->identity->isAdmin;
-            }
+              return Yii::$app->user->identity->isAdmin; // Only admins
+            },
           ],
         ],
       ],
@@ -36,6 +41,9 @@ class ArticleController extends Controller
     ];
   }
 
+  /**
+   * Lists all articles with search and filter.
+   */
   public function actionIndex()
   {
     $searchModel = new ArticleSearch();
@@ -47,6 +55,9 @@ class ArticleController extends Controller
     ]);
   }
 
+  /**
+   * Displays a single article.
+   */
   public function actionView($id)
   {
     return $this->render('view', [
@@ -54,6 +65,9 @@ class ArticleController extends Controller
     ]);
   }
 
+  /**
+   * Creates a new article.
+   */
   public function actionCreate()
   {
     $model = new Article();
@@ -63,7 +77,7 @@ class ArticleController extends Controller
       $model->viewed = 0;
       $model->upvotes = 0;
 
-      // Image Upload Logic
+      // Handle image upload
       $model->image = UploadedFile::getInstance($model, 'image');
       if ($model->image) {
         $filename = strtolower(md5(uniqid($model->image->baseName))) . '.' . $model->image->extension;
@@ -79,6 +93,9 @@ class ArticleController extends Controller
     return $this->render('create', ['model' => $model]);
   }
 
+  /**
+   * Updates an existing article.
+   */
   public function actionUpdate($id)
   {
     $model = $this->findModel($id);
@@ -102,15 +119,24 @@ class ArticleController extends Controller
     return $this->render('update', ['model' => $model]);
   }
 
+  /**
+   * Deletes an article.
+   */
   public function actionDelete($id)
   {
     $this->findModel($id)->delete();
     return $this->redirect(['index']);
   }
 
+  /**
+   * Finds the Article model by ID or throws 404.
+   */
   protected function findModel($id)
   {
-    if (($model = Article::findOne($id)) !== null) return $model;
+    if (($model = Article::findOne($id)) !== null) {
+      return $model;
+    }
+
     throw new NotFoundHttpException('The requested page does not exist.');
   }
 }

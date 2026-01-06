@@ -48,7 +48,6 @@ AppAsset::register($this);
                 'label' => 'Admin Panel',
                 'url' => ['/admin/default/index'],
                 'encode' => false,
-                // ДОДАНО: !important після кольору
                 'linkOptions' => ['class' => 'nav-link', 'style' => 'color: #ffca28 !important; font-weight: bold;']
             ];
         }
@@ -63,7 +62,6 @@ AppAsset::register($this);
                 . Html::beginForm(['auth/logout'])
                 . Html::submitButton(
                     'Logout',
-                    // ДОДАНО: !important після кольору
                     ['class' => 'nav-link logout-btn', 'style' => 'color: #cf6679 !important;']
                 )
                 . Html::endForm()

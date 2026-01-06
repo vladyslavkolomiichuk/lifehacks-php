@@ -30,7 +30,6 @@ $this->title = $model->name;
           'id',
           'name',
         ],
-        // Використовуємо table-dark та наш клас detail-view
         'options' => ['class' => 'table table-dark table-bordered detail-view mb-0'],
       ]) ?>
     </div>

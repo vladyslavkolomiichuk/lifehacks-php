@@ -9,21 +9,26 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
+/**
+ * Admin controller for managing votes.
+ */
 class VoteController extends Controller
 {
+  /**
+   * Access control and HTTP verb filters.
+   */
   public function behaviors()
   {
     return [
-      // 2. AccessControl
       'access' => [
         'class' => AccessControl::class,
         'rules' => [
           [
             'allow' => true,
-            'roles' => ['@'],
+            'roles' => ['@'], // Only authenticated users
             'matchCallback' => function ($rule, $action) {
-              return Yii::$app->user->identity->isAdmin;
-            }
+              return Yii::$app->user->identity->isAdmin; // Only admins
+            },
           ],
         ],
       ],
@@ -34,29 +39,42 @@ class VoteController extends Controller
     ];
   }
 
+  /**
+   * Lists all votes with search and filter.
+   */
   public function actionIndex()
   {
     $searchModel = new VoteSearch();
     $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-    return $this->render('index', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+
+    return $this->render('index', [
+      'searchModel' => $searchModel,
+      'dataProvider' => $dataProvider,
+    ]);
   }
 
+  /**
+   * Deletes a vote and decrements the article upvotes.
+   */
   public function actionDelete($id)
   {
     $vote = Vote::findOne($id);
+
     if ($vote) {
-      // При видаленні лайка з адмінки, треба зменшити лічильник в статті
       $vote->article->updateCounters(['upvotes' => -1]);
       $vote->delete();
     }
+
     return $this->redirect(['index']);
   }
 
+  /**
+   * Displays a single vote.
+   */
   public function actionView($id)
   {
-    // Vote зазвичай не має окремої моделі пошуку findModel, тому використовуємо прямий пошук
     return $this->render('view', [
-      'model' => \app\models\Vote::findOne($id),
+      'model' => Vote::findOne($id),
     ]);
   }
 }

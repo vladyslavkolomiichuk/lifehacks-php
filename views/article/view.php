@@ -227,9 +227,7 @@ $this->title = $article->title;
 </div>
 
 <?php
-// ... [JavaScript for comments remains the same as previously provided] ...
 $js = <<<JS
-    // 1. Reply logic
     $('.btn-reply').on('click', function(e) {
         e.preventDefault();
         var commentId = $(this).data('id');
@@ -247,7 +245,6 @@ $js = <<<JS
         $('#reply-block').slideUp();
     });
 
-    // 2. INLINE EDIT
     $(document).on('click', '.btn-edit-inline', function(e) {
         e.preventDefault();
         var container = $(this).closest('.media-body');
@@ -264,7 +261,6 @@ $js = <<<JS
         textarea.focus();
     });
 
-    // 3. CANCEL EDIT
     $(document).on('click', '.cancel-edit', function(e) {
         e.preventDefault();
         var container = $(this).closest('.media-body');
@@ -273,7 +269,6 @@ $js = <<<JS
         container.children('.comment-content').show();
     });
 
-    // 4. SAVE EDIT
     $(document).on('click', '.save-edit', function(e) {
         e.preventDefault();
         var btn = $(this);
@@ -317,7 +312,6 @@ $js = <<<JS
         });
     });
 
-    // 5. DELETE COMMENT
     $(document).on('click', '.btn-delete-inline', function(e) {
         e.preventDefault();
         if(!confirm('Are you sure you want to delete this comment?')) return;

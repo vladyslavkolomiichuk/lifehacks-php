@@ -7,7 +7,6 @@ use yii\helpers\ArrayHelper;
 /* @var $model app\models\Article */
 /* @var $topics app\models\Topic[] */
 
-// Стилі для темних полів
 $inputOptions = [
   'style' => 'background-color: #2d2d2d; border: 1px solid #444; color: #fff;',
   'class' => 'form-control'

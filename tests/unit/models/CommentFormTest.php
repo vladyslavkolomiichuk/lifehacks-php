@@ -9,6 +9,9 @@ use app\models\Article;
 use app\models\Topic;
 use app\models\Comment;
 
+/**
+ * Unit tests for CommentForm model.
+ */
 class CommentFormTest extends \Codeception\Test\Unit
 {
   /**
@@ -16,73 +19,83 @@ class CommentFormTest extends \Codeception\Test\Unit
    */
   protected $tester;
 
+  /**
+   * Clean database before each test.
+   */
   protected function _before()
   {
-    // Очищаємо таблиці
     Comment::deleteAll();
     Article::deleteAll();
     Topic::deleteAll();
     User::deleteAll();
   }
 
-  // ТЕСТ 1: Перевірка валідації форми
+  /**
+   * Test validation rules of CommentForm.
+   */
   public function testValidation()
   {
     $form = new CommentForm();
 
-    // Сценарій 1: Порожній коментар (Required)
+    // Scenario 1: Empty comment
     $form->comment = null;
     $this->assertFalse($form->validate(['comment']), 'Comment is required');
 
-    // Сценарій 2: Занадто короткий (min 3)
+    // Scenario 2: Too short comment (min 3)
     $form->comment = 'Hi';
     $this->assertFalse($form->validate(['comment']), 'Comment is too short');
 
-    // Сценарій 3: Занадто довгий (max 250)
+    // Scenario 3: Too long comment (max 250)
     $form->comment = str_repeat('a', 251);
     $this->assertFalse($form->validate(['comment']), 'Comment is too long');
 
-    // Сценарій 4: Правильний коментар
+    // Scenario 4: Valid comment
     $form->comment = 'Good article!';
-    $this->assertTrue($form->validate(['comment']));
+    $this->assertTrue($form->validate(['comment']), 'Valid comment should pass validation');
 
-    // Сценарій 5: Перевірка parentId (має бути integer)
+    // Scenario 5: parentId must be integer
     $form->parentId = 'abc';
-    $this->assertFalse($form->validate(['parentId']), 'Parent ID must be integer');
+    $this->assertFalse($form->validate(['parentId']), 'Parent ID must be an integer');
   }
 
-  // ТЕСТ 2: Перевірка збереження (saveComment)
+  /**
+   * Test saving a comment via saveComment().
+   */
   public function testSaveComment()
   {
-    // 1. Підготовка даних (Юзер, Топік, Стаття)
-    $user = new User(['name' => 'Tester', 'email' => 't@t.com', 'password' => '123']);
+    // 1. Prepare related models
+    $user = new User(['name' => 'Tester', 'email' => 't@t.com']);
+    $user->setPassword('123');
     $user->save(false);
 
     $topic = new Topic(['name' => 'Tech']);
     $topic->save(false);
 
-    $article = new Article(['title' => 'News', 'user_id' => $user->id, 'topic_id' => $topic->id]);
+    $article = new Article([
+      'title' => 'News',
+      'user_id' => $user->id,
+      'topic_id' => $topic->id,
+      'date' => date('Y-m-d')
+    ]);
     $article->save(false);
 
-    // 2. ВАЖЛИВО: Логінимо користувача, бо saveComment бере Yii::$app->user->id
+    // 2. Log in the user
     Yii::$app->user->login($user);
 
-    // 3. Заповнюємо форму
+    // 3. Fill CommentForm
     $form = new CommentForm();
     $form->comment = 'This is a test comment';
-    // $form->parentId = 5; // Поки що ваш код це ігнорує (див. примітку нижче)
 
-    // 4. Викликаємо метод збереження
+    // 4. Save the comment
     $result = $form->saveComment($article->id);
 
-    // 5. Перевірки
+    // 5. Assertions
     $this->assertTrue($result, 'saveComment should return true');
 
-    // Перевіряємо, чи з'явився запис у БД
     $savedComment = Comment::findOne(['text' => 'This is a test comment']);
     $this->assertNotNull($savedComment, 'Comment should exist in DB');
 
-    $this->assertEquals($user->id, $savedComment->user_id, 'User ID should match logged user');
+    $this->assertEquals($user->id, $savedComment->user_id, 'User ID should match logged-in user');
     $this->assertEquals($article->id, $savedComment->article_id, 'Article ID should match');
     $this->assertEquals(date('Y-m-d'), $savedComment->date, 'Date should be today');
   }

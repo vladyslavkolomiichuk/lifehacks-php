@@ -5,29 +5,35 @@ use app\models\Article;
 use app\models\Topic;
 use app\models\Comment;
 
+/**
+ * Functional tests for front-end Comment functionality.
+ */
 class CommentCest
 {
   private $userId;
   private $articleId;
 
+  /**
+   * Prepare test data: user, topic, article.
+   */
   public function _before(FunctionalTester $I)
   {
-    // Повне очищення
     Comment::deleteAll();
     Article::deleteAll();
     Topic::deleteAll();
     User::deleteAll();
 
-    // Створюємо автора
+    // 1. Create user
     $user = new User(['name' => 'Commenter', 'email' => 'c@c.com']);
     $user->setPassword('123');
     $user->save(false);
     $this->userId = $user->id;
 
+    // 2. Create topic
     $topic = new Topic(['name' => 'General']);
     $topic->save(false);
 
-    // Створюємо статтю, яку будемо коментувати
+    // 3. Create article
     $article = new Article([
       'title' => 'Article for Comments',
       'topic_id' => $topic->id,
@@ -38,24 +44,24 @@ class CommentCest
     $this->articleId = $article->id;
   }
 
-  // ТЕСТ 1: Гість не бачить форму
+  /**
+   * Test 1: Guest cannot see comment form
+   */
   public function guestCannotComment(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=article/view&id=' . $this->articleId);
 
     $I->see('Article for Comments', 'h1');
-
-    // Перевіряємо текст
     $I->see('Please');
-
-    // Перевіряємо посилання тільки за текстом (це надійніше для Yii2 URL-ів)
     $I->seeLink('Login');
 
-    // Перевіряємо, що форми немає
+    // Ensure textarea/form for comments is not present
     $I->dontSeeElement('#comment-textarea');
   }
 
-  // ТЕСТ 2: Авторизований користувач може коментувати
+  /**
+   * Test 2: Logged-in user can post a comment
+   */
   public function userCanPostComment(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->userId);
@@ -66,18 +72,18 @@ class CommentCest
     $I->fillField(['name' => 'CommentForm[comment]'], 'This is a functional test comment!');
     $I->click('Post Comment');
 
-    // 1. Перевірка редиректу (враховуємо %2F)
+    // Verify redirect back to article view
     $I->seeInCurrentUrl('r=article');
     $I->seeInCurrentUrl('view');
 
-    // 2. Перевірка бази даних (найважливіша частина!)
-    $I->seeRecord(\app\models\Comment::class, [
+    // Verify comment is stored in DB
+    $I->seeRecord(Comment::class, [
       'text' => 'This is a functional test comment!',
       'article_id' => $this->articleId,
       'user_id' => $this->userId
     ]);
 
-    // 3. Перевірка відображення на сторінці
+    // Verify comment is displayed on page
     $I->see('This is a functional test comment!');
     $I->see('Commenter');
   }

@@ -12,7 +12,6 @@ class Module extends \yii\base\Module
   public function init()
   {
     parent::init();
-    // Set a specific layout for the admin panel
     $this->layout = 'main';
   }
 
@@ -24,9 +23,8 @@ class Module extends \yii\base\Module
         'rules' => [
           [
             'allow' => true,
-            'roles' => ['@'], // Authenticated users
+            'roles' => ['@'],
             'matchCallback' => function ($rule, $action) {
-              // Check if user is admin (1 = admin)
               return Yii::$app->user->identity->isAdmin == 1;
             }
           ],

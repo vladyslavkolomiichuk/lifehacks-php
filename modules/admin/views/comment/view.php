@@ -46,7 +46,6 @@ $this->title = 'Comment #' . $model->id;
           ],
           'date',
         ],
-        // Темна таблиця, клас detail-view для стилів шрифтів
         'options' => ['class' => 'table table-dark table-bordered detail-view mb-0'],
       ]) ?>
     </div>

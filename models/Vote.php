@@ -5,7 +5,7 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "vote".
+ * ActiveRecord model for the "vote" table.
  *
  * @property int $id
  * @property int $user_id
@@ -17,7 +17,7 @@ use Yii;
 class Vote extends \yii\db\ActiveRecord
 {
   /**
-   * {@inheritdoc}
+   * Returns the table name.
    */
   public static function tableName()
   {
@@ -25,7 +25,7 @@ class Vote extends \yii\db\ActiveRecord
   }
 
   /**
-   * {@inheritdoc}
+   * Validation rules.
    */
   public function rules()
   {
@@ -36,7 +36,7 @@ class Vote extends \yii\db\ActiveRecord
   }
 
   /**
-   * {@inheritdoc}
+   * Attribute labels.
    */
   public function attributeLabels()
   {
@@ -47,10 +47,8 @@ class Vote extends \yii\db\ActiveRecord
     ];
   }
 
-    // === ДОДАЙТЕ ЦІ МЕТОДИ ===
-
   /**
-   * Зв'язок з користувачем
+   * Related user.
    */
   public function getUser()
   {
@@ -58,7 +56,7 @@ class Vote extends \yii\db\ActiveRecord
   }
 
   /**
-   * Зв'язок зі статтею
+   * Related article.
    */
   public function getArticle()
   {

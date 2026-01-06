@@ -19,7 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'layout' => "{summary}\n<div class='table-responsive'>{items}</div>\n{pager}",
-        // Використовуємо класи, які ми прописали в CSS
         'tableOptions' => ['class' => 'table table-hover table-striped mb-0'],
         'columns' => [
           [
@@ -29,7 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
           ],
           'name',
 
-          // Колонка дій з новими стилями
           [
             'class' => 'yii\grid\ActionColumn',
             'header' => 'ACTIONS',

@@ -5,19 +5,16 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "topic".
+ * ActiveRecord model for the "topic" table.
  *
  * @property int $id
  * @property string|null $name
- *
  * @property Article[] $articles
  */
 class Topic extends \yii\db\ActiveRecord
 {
-
-
     /**
-     * {@inheritdoc}
+     * Returns the table name.
      */
     public static function tableName()
     {
@@ -25,7 +22,7 @@ class Topic extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * Validation rules.
      */
     public function rules()
     {
@@ -36,7 +33,7 @@ class Topic extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
+     * Attribute labels.
      */
     public function attributeLabels()
     {
@@ -47,13 +44,10 @@ class Topic extends \yii\db\ActiveRecord
     }
 
     /**
-     * Gets query for [[Articles]].
-     *
-     * @return \yii\db\ActiveQuery
+     * Related articles.
      */
     public function getArticles()
     {
         return $this->hasMany(Article::class, ['topic_id' => 'id']);
     }
-
 }

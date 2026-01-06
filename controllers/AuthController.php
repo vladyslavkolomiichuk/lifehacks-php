@@ -12,7 +12,7 @@ use app\models\User;
 class AuthController extends Controller
 {
   /**
-   * Налаштування доступу
+   * Access configuration
    */
   public function behaviors()
   {
@@ -24,12 +24,12 @@ class AuthController extends Controller
           [
             'actions' => ['login', 'signup'],
             'allow' => true,
-            'roles' => ['?'], // Тільки гості
+            'roles' => ['?'],
           ],
           [
             'actions' => ['logout'],
             'allow' => true,
-            'roles' => ['@'], // Тільки авторизовані
+            'roles' => ['@'],
           ],
         ],
       ],
@@ -37,7 +37,7 @@ class AuthController extends Controller
   }
 
   /**
-   * Вхід
+   * Login
    */
   public function actionLogin()
   {
@@ -57,7 +57,7 @@ class AuthController extends Controller
   }
 
   /**
-   * Реєстрація
+   * Signup
    */
   public function actionSignup()
   {
@@ -78,7 +78,7 @@ class AuthController extends Controller
   }
 
   /**
-   * Вихід
+   * Logout
    */
   public function actionLogout()
   {

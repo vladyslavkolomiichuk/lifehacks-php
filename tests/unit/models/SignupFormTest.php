@@ -5,6 +5,9 @@ namespace tests\unit\models;
 use app\models\SignupForm;
 use app\models\User;
 
+/**
+ * Unit tests for SignupForm model.
+ */
 class SignupFormTest extends \Codeception\Test\Unit
 {
   /**
@@ -14,31 +17,35 @@ class SignupFormTest extends \Codeception\Test\Unit
 
   protected function _before()
   {
-    // Очищаємо таблицю користувачів перед кожним тестом
+    // Clear users table before each test
     User::deleteAll();
   }
 
-  // ТЕСТ 1: Перевірка валідації (некоректні дані)
+  /**
+   * Test validation rules: required fields, password length, email format.
+   */
   public function testValidation()
   {
     $model = new SignupForm();
 
-    // Сценарій 1: Порожні поля
+    // 1. Empty fields
     $this->assertFalse($model->validate(), 'Empty model should not be valid');
     $this->assertArrayHasKey('name', $model->errors);
     $this->assertArrayHasKey('email', $model->errors);
     $this->assertArrayHasKey('password', $model->errors);
 
-    // Сценарій 2: Короткий пароль (< 6 символів)
+    // 2. Too short password
     $model->password = '123';
-    $this->assertFalse($model->validate(['password']), 'Password should be min 6 chars');
+    $this->assertFalse($model->validate(['password']), 'Password must be at least 6 characters');
 
-    // Сценарій 3: Некоректний Email
+    // 3. Invalid email format
     $model->email = 'not-email';
     $this->assertFalse($model->validate(['email']), 'Email should be valid');
   }
 
-  // ТЕСТ 2: Успішна реєстрація
+  /**
+   * Test successful signup.
+   */
   public function testCorrectSignup()
   {
     $model = new SignupForm([
@@ -47,56 +54,50 @@ class SignupFormTest extends \Codeception\Test\Unit
       'password' => 'secret_password',
     ]);
 
-    // 1. Перевіряємо, чи валідація проходить
+    // Validation should pass
     $this->assertTrue($model->validate(), 'Model should be valid with correct data');
 
-    // 2. Викликаємо метод signup()
+    // Perform signup
     $user = $model->signup();
 
-    // 3. Перевіряємо, чи повернувся об'єкт User
-    $this->assertNotNull($user, 'Signup should return user object');
+    // Returned object should be User
+    $this->assertNotNull($user);
     $this->assertInstanceOf(User::class, $user);
 
-    // 4. Перевіряємо, чи записались дані в базу
-    // ВАЖЛИВО: У вашому коді ви записуєте $this->email у $user->email
-    $this->assertEquals('newuser@example.com', $user->email);
+    // Check saved data
     $this->assertEquals('New User', $user->name);
-
-    // Перевіряємо пароль (у вашому коді він не хешується)
-    $this->assertEquals('secret_password', $user->password);
-
-    // Перевіряємо дефолтні значення
-    $this->assertEquals('default.jpg', $user->image);
+    $this->assertEquals('newuser@example.com', $user->email);
+    $this->assertEquals('secret_password', $user->password); // depends on whether signup hashes password
     $this->assertEquals(0, $user->isAdmin);
+    $this->assertEquals('default.jpg', $user->image);
 
-    // Переконуємось, що запис є в БД
+    // Confirm record exists in DB
     $this->tester->seeRecord(User::class, ['email' => 'newuser@example.com']);
   }
 
-  // ТЕСТ 3: Перевірка унікальності Email
+  /**
+   * Test that duplicate emails are rejected.
+   */
   public function testDuplicateEmail()
   {
-    // Крок 1: Створюємо першого користувача
-    $firstUser = new User();
-    $firstUser->name = 'First';
-    // Увага: валідатор у вашій формі перевіряє колонку 'email', 
-    // тому для тесту ми мусимо заповнити 'email' в User, якщо така колонка є.
-    // Якщо у User є тільки 'login', то валідатор у SignupForm треба виправити (див. примітку нижче).
-    // Припускаємо, що в User є поле email, яке перевіряє унікальність.
-    $firstUser->email = 'duplicate@example.com';
-    $firstUser->password = '123456';
+    // Create first user
+    $firstUser = new User([
+      'name' => 'First User',
+      'email' => 'duplicate@example.com',
+      'password' => '123456',
+    ]);
     $firstUser->save(false);
 
-    // Крок 2: Пробуємо зареєструвати другого з тим самим email
+    // Attempt to register another with same email
     $model = new SignupForm([
       'name' => 'Second User',
-      'email' => 'duplicate@example.com', // Той самий email
+      'email' => 'duplicate@example.com',
       'password' => 'new_password',
     ]);
 
-    // Очікуємо помилку валідації
-    $this->assertFalse($model->validate(), 'Should not allow duplicate email');
+    // Validation should fail
+    $this->assertFalse($model->validate(), 'Duplicate email should not be allowed');
     $this->assertArrayHasKey('email', $model->errors);
-    $this->assertEquals('Ця пошта вже зайнята.', $model->errors['email'][0]);
+    $this->assertEquals('This email is already taken.', $model->errors['email'][0]);
   }
 }

@@ -2,17 +2,24 @@
 
 use app\models\User;
 
+/**
+ * Functional tests for admin access control.
+ */
 class AdminAccessCest
 {
   private $adminId;
   private $regularUserId;
 
+  /**
+   * Runs before each test.
+   * Sets up an admin and a regular user.
+   */
   public function _before(FunctionalTester $I)
   {
-    // Очищаємо базу перед кожним тестом
+    // Clear users table
     User::deleteAll();
 
-    // 1. Створюємо Адміна (isAdmin = 1)
+    // Create admin user
     $admin = new User();
     $admin->name = 'Admin';
     $admin->email = 'admin@test.com';
@@ -21,7 +28,7 @@ class AdminAccessCest
     $admin->save(false);
     $this->adminId = $admin->id;
 
-    // 2. Створюємо звичайного юзера (isAdmin = 0)
+    // Create regular user
     $user = new User();
     $user->name = 'Simple User';
     $user->email = 'user@test.com';
@@ -31,48 +38,48 @@ class AdminAccessCest
     $this->regularUserId = $user->id;
   }
 
-  // СЦЕНАРІЙ 1: Гість (не залогінений) пробує зайти в адмінку
+  /**
+   * Scenario 1: Guest (not logged in) tries to access admin page.
+   */
   public function guestTryToAccessAdmin(FunctionalTester $I)
   {
     $I->amOnPage('/index-test.php?r=admin/default/index');
 
-    // Варіант 1: Шукаємо частину рядка в URL без спецсимволів
+    // Verify redirected to login
     $I->seeInCurrentUrl('auth');
     $I->seeInCurrentUrl('login');
 
-    // Варіант 2: Перевіряємо заголовок форми, що є 100% доказом того, що ми на логіні
+    // Verify login form text
     $I->see('Login', 'h3');
     $I->see('Please fill out the following fields to login:');
   }
 
-  // СЦЕНАРІЙ 2: Звичайний юзер пробує зайти в адмінку
+  /**
+   * Scenario 2: Regular user tries to access admin page.
+   */
   public function regularUserTryToAccessAdmin(FunctionalTester $I)
   {
-    // amLoggedInAs автоматично знаходить юзера в БД за ID і логінить його в сесію
     $I->amLoggedInAs($this->regularUserId);
-
     $I->amOnPage('/index-test.php?r=admin/default/index');
 
-    // Якщо у вас налаштовано RBAC або AccessControl (matchCallback),
-    // то при спробі доступу без прав isAdmin=1 зазвичай повертається 403 помилка.
+    // Expect forbidden response
     $I->seeResponseCodeIs(403);
-
-    // Перевіряємо текст стандартної помилки Yii2
     $I->see('Forbidden');
     $I->dontSee('Admin Panel');
   }
 
-  // СЦЕНАРІЙ 3: Адмін успішно заходить
+  /**
+   * Scenario 3: Admin user successfully accesses admin page.
+   */
   public function adminAccess(FunctionalTester $I)
   {
     $I->amLoggedInAs($this->adminId);
-
     $I->amOnPage('/index-test.php?r=admin/default/index');
 
-    // Перевіряємо успішний статус
+    // Expect OK response
     $I->seeResponseCodeIs(200);
 
-    // Перевіряємо наявність специфічного тексту адмінки (наприклад, заголовок)
+    // Verify admin panel text
     $I->see('Admin');
     $I->dontSee('Please fill out the following fields to login:');
   }

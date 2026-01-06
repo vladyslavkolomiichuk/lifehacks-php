@@ -10,7 +10,7 @@ use app\models\User;
 <div class="article-form card bg-dark border-secondary shadow-sm">
   <div class="card-body">
     <?php $form = ActiveForm::begin([
-      'options' => ['enctype' => 'multipart/form-data', 'class' => 'dark-form'] // Додаємо клас dark-form
+      'options' => ['enctype' => 'multipart/form-data', 'class' => 'dark-form']
     ]); ?>
 
     <div class="row">

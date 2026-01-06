@@ -7,11 +7,11 @@ use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
 /**
- * User model
+ * ActiveRecord model for the "user" table.
  *
  * @property int $id
  * @property string $name
- * @property string $login
+ * @property string $email
  * @property string $password
  * @property string $image
  * @property int $isAdmin
@@ -19,7 +19,7 @@ use yii\web\IdentityInterface;
 class User extends ActiveRecord implements IdentityInterface
 {
     /**
-     * Вказуємо назву таблиці в БД
+     * Returns the table name.
      */
     public static function tableName()
     {
@@ -27,7 +27,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Правила валідації (потрібні для Gii та збереження даних)
+     * Validation rules.
      */
     public function rules()
     {
@@ -36,17 +36,12 @@ class User extends ActiveRecord implements IdentityInterface
             [['password'], 'string', 'min' => 6],
             [['isAdmin'], 'integer'],
             [['name', 'email', 'password', 'image'], 'string', 'max' => 255],
-            [['email'], 'unique'], // Логін (email) має бути унікальним
+            [['email'], 'unique'],
         ];
     }
 
     /**
-     * --- МЕТОДИ ІНТЕРФЕЙСУ IdentityInterface (Для авторизації) ---
-     */
-
-    /**
-     * Знаходить ідентиті (користувача) за ID.
-     * Саме тут використовується findOne, який викликав помилку.
+     * Finds a user by ID.
      */
     public static function findIdentity($id)
     {
@@ -54,8 +49,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Знаходить користувача за токеном доступу (зазвичай для API).
-     * Ми поки залишаємо пустим або null, бо у нас сесійна авторизація.
+     * Finds a user by access token (not used).
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
@@ -63,7 +57,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Знаходить користувача за логіном (використовується нами вручну).
+     * Finds a user by email.
      */
     public static function findByUsername($username)
     {
@@ -71,7 +65,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Повертає ID поточного користувача.
+     * Returns the user ID.
      */
     public function getId()
     {
@@ -79,26 +73,23 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Повертає ключ автентифікації (заглушка для тестів)
+     * Returns the auth key (stub).
      */
     public function getAuthKey()
     {
-        // Просто повертаємо порожній рядок або null, 
-        // щоб Yii не шукав властивість $this->auth_key
         return '';
     }
 
     /**
-     * Валідує ключ автентифікації
+     * Validates the auth key.
      */
     public function validateAuthKey($authKey)
     {
-        // Повертаємо true, щоб валідація завжди проходила успішно
         return true;
     }
 
     /**
-     * Генерує хеш пароля і записує його в атрибут password
+     * Sets a hashed password.
      */
     public function setPassword($password)
     {
@@ -106,30 +97,30 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Перевіряє, чи співпадає введений пароль із збереженим хешем
+     * Validates a password against the stored hash.
      */
     public function validatePassword($password)
     {
         return Yii::$app->security->validatePassword($password, $this->password);
     }
 
+    /**
+     * Related articles.
+     */
     public function getArticles()
     {
-        // Зв'язок: User має багато Articles (по полю user_id)
         return $this->hasMany(Article::class, ['user_id' => 'id']);
     }
 
+    /**
+     * Returns the user avatar path or a fallback image.
+     */
     public function getThumb()
     {
-        // Шлях до папки, де лежать файли
         $path = Yii::getAlias('@webroot/uploads/') . $this->image;
 
-        // Перевіряємо: чи записано щось в БД, і чи існує файл фізично
-        if ($this->image && file_exists($path)) {
-            return '/uploads/' . $this->image;
-        }
-
-        // Якщо фото немає - повертаємо заглушку
-        return '/uploads/no-image.png';
+        return ($this->image && file_exists($path))
+            ? '/uploads/' . $this->image
+            : '/uploads/no-image.png';
     }
 }

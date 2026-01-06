@@ -11,7 +11,7 @@ use yii\bootstrap5\ActiveForm;
 <div class="topic-form card bg-dark border-secondary shadow-sm">
   <div class="card-body">
     <?php $form = ActiveForm::begin([
-      'options' => ['class' => 'dark-form'] // Використовуємо глобальний стиль для темних полів
+      'options' => ['class' => 'dark-form']
     ]); ?>
 
     <?= $form->field($model, 'name')->textInput([

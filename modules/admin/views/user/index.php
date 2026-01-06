@@ -16,7 +16,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'layout' => "{summary}\n<div class='table-responsive'>{items}</div>\n{pager}",
-        // Важливо: table-striped і table-hover тепер мають наші темні стилі
         'tableOptions' => ['class' => 'table table-hover table-striped mb-0'],
         'columns' => [
           [
@@ -29,7 +28,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'label' => 'PHOTO',
             'format' => 'raw',
             'value' => function ($model) {
-              // Використовуємо наш новий метод getThumb()
               return Html::img($model->getThumb(), [
                 'style' => 'width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #333;'
               ]);
@@ -55,7 +53,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => ['style' => 'text-align:center;'],
           ],
 
-          // ACTION COLUMN: Іконки залишили, додали лише класи стилів
           [
             'class' => 'yii\grid\ActionColumn',
             'header' => 'ACTIONS',

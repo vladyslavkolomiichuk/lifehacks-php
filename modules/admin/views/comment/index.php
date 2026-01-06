@@ -15,17 +15,14 @@ $this->title = 'Comments Manager';
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'layout' => "{summary}\n<div class='table-responsive'>{items}</div>\n{pager}",
-        // Наші класи для темної таблиці
         'tableOptions' => ['class' => 'table table-hover table-striped mb-0'],
         'columns' => [
-          // ID по центру
           [
             'attribute' => 'id',
             'headerOptions' => ['style' => 'width:60px; text-align:center;'],
             'contentOptions' => ['style' => 'text-align:center; color: #777;'],
           ],
 
-          // Текст коментаря
           [
             'attribute' => 'text',
             'label' => 'COMMENT TEXT',
@@ -34,14 +31,12 @@ $this->title = 'Comments Manager';
             },
           ],
 
-          // Стаття
           [
             'attribute' => 'article_id',
             'value' => 'article.title',
             'label' => 'ARTICLE',
           ],
 
-          // Автор
           [
             'attribute' => 'user_id',
             'value' => 'user.name',
@@ -49,14 +44,12 @@ $this->title = 'Comments Manager';
             'headerOptions' => ['style' => 'width: 15%;'],
           ],
 
-          // Дата
           [
             'attribute' => 'date',
             'label' => 'DATE',
             'headerOptions' => ['style' => 'width: 150px;'],
           ],
 
-          // Колонка дій
           [
             'class' => 'yii\grid\ActionColumn',
             'header' => 'ACTIONS',

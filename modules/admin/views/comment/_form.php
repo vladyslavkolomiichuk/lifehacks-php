@@ -11,7 +11,7 @@ use yii\bootstrap5\ActiveForm;
 <div class="comment-form card bg-dark border-secondary shadow-sm">
   <div class="card-body">
     <?php $form = ActiveForm::begin([
-      'options' => ['class' => 'dark-form'] // Підключаємо наші глобальні стилі
+      'options' => ['class' => 'dark-form']
     ]); ?>
 
     <?= $form->field($model, 'text')->textarea([

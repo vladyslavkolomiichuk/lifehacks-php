@@ -6,14 +6,17 @@ use Yii;
 use yii\base\Model;
 
 /**
- * Signup form
+ * Form model for user registration.
  */
 class SignupForm extends Model
 {
   public $name;
-  public $email; // У формі ми називаємо це email, але в БД це запишеться в login
+  public $email;
   public $password;
 
+  /**
+   * Validation rules.
+   */
   public function rules()
   {
     return [
@@ -26,8 +29,14 @@ class SignupForm extends Model
       ['email', 'email'],
       ['email', 'string', 'max' => 255],
 
-      // ВАЖЛИВО: перевіряємо унікальність по колонці 'login' у таблиці User
-      ['email', 'unique', 'targetClass' => '\app\models\User', 'targetAttribute' => 'email', 'message' => 'Ця пошта вже зайнята.'],
+      // Ensure email uniqueness
+      [
+        'email',
+        'unique',
+        'targetClass' => User::class,
+        'targetAttribute' => 'email',
+        'message' => 'This email is already taken.',
+      ],
 
       ['password', 'required'],
       ['password', 'string', 'min' => 6],
@@ -35,7 +44,7 @@ class SignupForm extends Model
   }
 
   /**
-   * Реєстрація користувача.
+   * Creates a new user account.
    */
   public function signup()
   {
@@ -45,13 +54,10 @@ class SignupForm extends Model
 
     $user = new User();
     $user->name = $this->name;
-    $user->email = $this->email; // Записуємо email у поле login
-
-    // Зберігаємо пароль як є, бо у вашій моделі User перевірка йде через === (без хешування)
+    $user->email = $this->email;
     $user->password = $this->password;
-
-    $user->image = 'default.jpg'; // Заглушка, щоб не було помилки
-    $user->isAdmin = 0; // Звичайний користувач
+    $user->image = 'default.jpg';
+    $user->isAdmin = 0;
 
     return $user->save() ? $user : null;
   }

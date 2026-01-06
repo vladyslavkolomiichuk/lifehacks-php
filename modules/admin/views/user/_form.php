@@ -25,7 +25,7 @@ use yii\bootstrap5\ActiveForm;
       <div class="col-md-6 mb-3">
         <?= $form->field($model, 'password')->passwordInput([
           'placeholder' => $model->isNewRecord ? 'Enter password' : 'Leave blank to keep current password',
-          'value' => '' // Щоб не підставляло хеш при редагуванні
+          'value' => ''
         ]) ?>
       </div>
       <div class="col-md-6 mb-3">

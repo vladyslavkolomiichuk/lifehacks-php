@@ -2,9 +2,6 @@
 
 use yii\bootstrap5\Html;
 
-/* @var $this yii\web\View */
-/* @var $model app\models\Article */
-
 $this->title = 'Create Article';
 ?>
 <div class="article-create">

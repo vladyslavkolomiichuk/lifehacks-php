@@ -18,7 +18,7 @@ class ProfileController extends Controller
         'rules' => [
           [
             'allow' => true,
-            'roles' => ['@'], // Тільки авторизовані
+            'roles' => ['@'],
           ],
         ],
       ],
@@ -26,7 +26,7 @@ class ProfileController extends Controller
   }
 
   /**
-   * Dashboard: Статті користувача та інфо
+   * Dashboard
    */
   public function actionIndex()
   {
@@ -40,45 +40,34 @@ class ProfileController extends Controller
   }
 
   /**
-   * Налаштування профілю (Аватар, Пароль)
+   * Profile settings
    */
   public function actionUpdate()
   {
     $user = User::findOne(Yii::$app->user->id);
 
-    // 1. Зберігаємо старий пароль (хеш), який зараз є в базі
     $oldPasswordHash = $user->password;
-    // Зберігаємо старе фото, щоб не зникло, якщо не завантажили нове
     $oldImage = $user->image;
 
-    // Очищаємо поле пароля в моделі, щоб у формі воно було пустим
     $user->password = '';
 
     if ($user->load(Yii::$app->request->post())) {
 
-      // 2. ЛОГІКА ПАРОЛЯ
-      // Якщо поле пароля пусте (користувач не хоче його змінювати)
       if (empty($user->password)) {
-        // Повертаємо старий хеш
         $user->password = $oldPasswordHash;
       } else {
-        // Якщо користувач ввів щось нове -> генеруємо новий хеш
-        // Важливо: метод setPassword має бути у вашій моделі User
         $user->setPassword($user->password);
       }
 
-      // 3. ЛОГІКА КАРТИНКИ
       $file = \yii\web\UploadedFile::getInstance($user, 'image');
       if ($file) {
         $filename = strtolower(md5(uniqid($file->baseName))) . '.' . $file->extension;
         $file->saveAs(Yii::getAlias('@webroot') . '/uploads/' . $filename);
         $user->image = $filename;
       } else {
-        // Якщо файл не вибрали, залишаємо старий
         $user->image = $oldImage;
       }
 
-      // 4. ЗБЕРЕЖЕННЯ
       if ($user->save()) {
         Yii::$app->session->setFlash('success', 'Profile updated successfully!');
         return $this->redirect(['index']);

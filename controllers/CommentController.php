@@ -19,7 +19,7 @@ class CommentController extends Controller
         'rules' => [
           [
             'allow' => true,
-            'roles' => ['@'], // Тільки авторизовані
+            'roles' => ['@'],
           ],
         ],
       ],
@@ -27,7 +27,7 @@ class CommentController extends Controller
   }
 
   /**
-   * Додати коментар (Залишаємо як є, або теж можна переробити під AJAX при бажанні)
+   * Add comment
    */
   public function actionCreate($id)
   {
@@ -55,13 +55,12 @@ class CommentController extends Controller
   }
 
   /**
-   * Видалити коментар (Оновлено для AJAX)
+   * Delete comment
    */
   public function actionDelete($id)
   {
     $comment = Comment::findOne($id);
 
-    // Перевірка прав доступу
     if (!$comment || $comment->user_id != Yii::$app->user->id) {
       if (Yii::$app->request->isAjax) {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -72,25 +71,22 @@ class CommentController extends Controller
 
     $comment->delete();
 
-    // ЯКЩО ЦЕ AJAX (запит від JavaScript)
     if (Yii::$app->request->isAjax) {
       Yii::$app->response->format = Response::FORMAT_JSON;
       return ['success' => true];
     }
 
-    // Якщо це звичайний запит - робимо редірект
     Yii::$app->session->setFlash('success', "Comment deleted.");
     return $this->redirect(Yii::$app->request->referrer);
   }
 
   /**
-   * Редагувати коментар
+   * Update comment
    */
   public function actionUpdate($id)
   {
     $comment = Comment::findOne($id);
 
-    // Перевірка прав
     if (!$comment || $comment->user_id != Yii::$app->user->id) {
       if (Yii::$app->request->isAjax) {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -101,7 +97,6 @@ class CommentController extends Controller
 
     $model = new CommentForm();
 
-    // 1. ЛОГІКА ДЛЯ AJAX (те, що працює на сторінці)
     if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
       Yii::$app->response->format = Response::FORMAT_JSON;
 
@@ -119,8 +114,6 @@ class CommentController extends Controller
       }
     }
 
-    // 2. ЛОГІКА ДЛЯ ЗВИЧАЙНОГО ЗАПИТУ (якщо JS вимкнено або відкрили в новому вікні)
-    // Замість рендеру окремої сторінки, просто повертаємо назад до статті
     return $this->redirect(['article/view', 'id' => $comment->article_id]);
   }
 }

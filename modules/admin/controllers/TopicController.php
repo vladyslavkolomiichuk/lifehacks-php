@@ -10,22 +10,26 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 
+/**
+ * Admin controller for managing topics.
+ */
 class TopicController extends Controller
 {
+  /**
+   * Access control and HTTP verb filters.
+   */
   public function behaviors()
   {
     return [
-      // 2. Додайте контроль доступу
       'access' => [
         'class' => AccessControl::class,
         'rules' => [
           [
             'allow' => true,
-            'roles' => ['@'], // Тільки авторизовані
+            'roles' => ['@'], // Only authenticated users
             'matchCallback' => function ($rule, $action) {
-              // Тільки Адміни
-              return Yii::$app->user->identity->isAdmin;
-            }
+              return Yii::$app->user->identity->isAdmin; // Only admins
+            },
           ],
         ],
       ],
@@ -35,33 +39,77 @@ class TopicController extends Controller
       ],
     ];
   }
+
+  /**
+   * Lists all topics with search and filter.
+   */
   public function actionIndex()
   {
     $searchModel = new TopicSearch();
     $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-    return $this->render('index', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+
+    return $this->render('index', [
+      'searchModel' => $searchModel,
+      'dataProvider' => $dataProvider,
+    ]);
   }
+
+  /**
+   * Creates a new topic.
+   */
   public function actionCreate()
   {
     $model = new Topic();
-    if ($model->load(Yii::$app->request->post()) && $model->save()) return $this->redirect(['index']);
+
+    if ($model->load(Yii::$app->request->post()) && $model->save()) {
+      return $this->redirect(['index']);
+    }
+
     return $this->render('create', ['model' => $model]);
   }
+
+  /**
+   * Updates an existing topic.
+   */
   public function actionUpdate($id)
   {
-    $model = Topic::findOne($id);
-    if ($model->load(Yii::$app->request->post()) && $model->save()) return $this->redirect(['index']);
+    $model = $this->findModel($id);
+
+    if ($model->load(Yii::$app->request->post()) && $model->save()) {
+      return $this->redirect(['index']);
+    }
+
     return $this->render('update', ['model' => $model]);
   }
+
+  /**
+   * Deletes a topic.
+   */
   public function actionDelete($id)
   {
-    Topic::findOne($id)->delete();
+    $this->findModel($id)->delete();
     return $this->redirect(['index']);
   }
+
+  /**
+   * Displays a single topic.
+   */
   public function actionView($id)
   {
     return $this->render('view', [
-      'model' => Topic::findOne($id),
+      'model' => $this->findModel($id),
     ]);
+  }
+
+  /**
+   * Finds the Topic model by ID or throws 404.
+   */
+  protected function findModel($id)
+  {
+    if (($model = Topic::findOne($id)) !== null) {
+      return $model;
+    }
+
+    throw new NotFoundHttpException('The requested topic does not exist.');
   }
 }

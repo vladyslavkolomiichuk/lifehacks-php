@@ -2,12 +2,17 @@
 
 namespace app\models;
 
-use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\models\User;
+use yii\base\Model;
 
+/**
+ * UserSearch handles filtering of users.
+ */
 class UserSearch extends User
 {
+    /**
+     * Validation rules for search fields.
+     */
     public function rules()
     {
         return [
@@ -16,25 +21,38 @@ class UserSearch extends User
         ];
     }
 
+    /**
+     * Scenarios (default from Model).
+     */
     public function scenarios()
     {
         return Model::scenarios();
     }
 
+    /**
+     * Builds data provider with applied search filters.
+     */
     public function search($params)
     {
         $query = User::find();
-        $dataProvider = new ActiveDataProvider(['query' => $query]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
 
         $this->load($params);
 
-        if (!$this->validate()) return $dataProvider;
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
 
+        // Exact match filters
         $query->andFilterWhere([
             'id' => $this->id,
             'isAdmin' => $this->isAdmin,
         ]);
 
+        // Partial match filters
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'email', $this->email]);
 

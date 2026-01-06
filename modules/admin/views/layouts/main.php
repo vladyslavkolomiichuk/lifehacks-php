@@ -32,7 +32,6 @@ AppAsset::register($this);
     NavBar::begin([
       'brandLabel' => 'LifeHacks Admin',
       'brandUrl' => ['/admin/default/index'],
-      // Використовуємо navbar-dark bg-dark для темної теми
       'options' => ['class' => 'navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary fixed-top shadow'],
     ]);
 
@@ -52,8 +51,8 @@ AppAsset::register($this);
           'encode' => false,
           'linkOptions' => [
             'target' => '_blank',
-            'class' => 'fw-bold', // Можна прибрати text-info, якщо ми все одно задаємо колір вручну
-            'style' => 'color: #ffca28 !important; font-weight: bold;' // <--- ТЕПЕР ТУТ
+            'class' => 'fw-bold',
+            'style' => 'color: #ffca28 !important; font-weight: bold;'
           ],
         ],
         [
@@ -62,7 +61,7 @@ AppAsset::register($this);
           'encode' => false,
           'linkOptions' => [
             'data-method' => 'post',
-            'style' => 'color: #cf6679 !important;' // <--- ТЕПЕР ТУТ
+            'style' => 'color: #cf6679 !important;'
           ],
         ],
       ],

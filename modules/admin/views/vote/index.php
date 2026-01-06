@@ -16,17 +16,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'layout' => "{summary}\n<div class='table-responsive'>{items}</div>\n{pager}",
-        // Використовуємо наші класи для стилів
         'tableOptions' => ['class' => 'table table-hover table-striped mb-0'],
         'columns' => [
-          // ID по центру
           [
             'attribute' => 'id',
             'headerOptions' => ['style' => 'width:60px; text-align:center;'],
             'contentOptions' => ['style' => 'text-align:center; color: #777;'],
           ],
 
-          // Користувач
           [
             'attribute' => 'user_id',
             'value' => 'user.name',
@@ -34,14 +31,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'headerOptions' => ['style' => 'width: 25%;'],
           ],
 
-          // Стаття
           [
             'attribute' => 'article_id',
             'value' => 'article.title',
             'label' => 'ARTICLE TITLE',
           ],
 
-          // Колонка дій (тільки Перегляд та Видалення)
           [
             'class' => 'yii\grid\ActionColumn',
             'header' => 'ACTIONS',

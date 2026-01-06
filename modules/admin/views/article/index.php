@@ -21,17 +21,14 @@ $this->title = 'Articles Manager';
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'layout' => "{summary}\n<div class='table-responsive'>{items}</div>\n{pager}",
-        // Наші темні стилі
         'tableOptions' => ['class' => 'table table-hover table-striped mb-0'],
         'columns' => [
-          // ID замість SerialColumn (часто корисніше в адмінці)
           [
             'attribute' => 'id',
             'headerOptions' => ['style' => 'width:60px; text-align:center;'],
             'contentOptions' => ['style' => 'text-align:center; color: #777;'],
           ],
 
-          // Зображення з гарним оформленням
           [
             'attribute' => 'image',
             'label' => 'IMAGE',
@@ -48,7 +45,6 @@ $this->title = 'Articles Manager';
 
           'title',
 
-          // Категорія (Topic)
           [
             'attribute' => 'topic_id',
             'value' => 'topic.name',
@@ -56,7 +52,6 @@ $this->title = 'Articles Manager';
             'filter' => ArrayHelper::map(Topic::find()->all(), 'id', 'name'),
           ],
 
-          // Автор (User)
           [
             'attribute' => 'user_id',
             'value' => 'user.name',
@@ -64,14 +59,12 @@ $this->title = 'Articles Manager';
             'filter' => ArrayHelper::map(User::find()->all(), 'id', 'name'),
           ],
 
-          // Дата
           [
             'attribute' => 'date',
             'label' => 'DATE',
             'headerOptions' => ['style' => 'width:120px;'],
           ],
 
-          // Перегляди
           [
             'attribute' => 'viewed',
             'label' => 'VIEWS',
@@ -79,7 +72,6 @@ $this->title = 'Articles Manager';
             'contentOptions' => ['style' => 'text-align:center;'],
           ],
 
-          // Колонка дій
           [
             'class' => 'yii\grid\ActionColumn',
             'header' => 'ACTIONS',

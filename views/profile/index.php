@@ -5,7 +5,6 @@ use yii\helpers\Url;
 
 $this->title = 'User Cabinet';
 
-// --- Analytics Logic ---
 $totalArticles = count($articles);
 $totalViews = 0;
 $totalLikes = 0;
@@ -16,7 +15,6 @@ foreach ($articles as $article) {
 }
 
 $avgViews = $totalArticles > 0 ? round($totalViews / $totalArticles) : 0;
-// -----------------------
 ?>
 
 <div class="profile-index">
